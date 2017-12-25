@@ -1,0 +1,26 @@
+﻿using System;
+
+namespace WarrigalsAutopilot
+{
+    abstract class ControlTarget
+    {
+        public abstract string Name { get; }
+
+        public abstract float ProcessVariable { get; }
+
+        public virtual float ErrorFromSetPoint(float setPoint)
+        {
+            return ProcessVariable - setPoint;
+        }
+
+        internal static float AngleSubtract(float angle, float minusAngle)
+        {
+            float result = (angle - minusAngle) % 360.0f;
+
+            if (result <= -180) result += 360;
+            if (result > 180) result -= 360;
+
+            return result;
+        }
+    }
+}
