@@ -6,13 +6,7 @@ namespace WarrigalsAutopilot
     {
         public ControlTarget Target { get; set; }
         public float SetPoint { get; set; }
-        public float CoeffP { get; set; } = 0.001f;
-
-        public Controller(ControlTarget target, float setPoint)
-        {
-            Target = target;
-            SetPoint = setPoint;
-        }
+        public float CoeffP { get; set; }
 
         public float Output
         {
