@@ -8,6 +8,7 @@ namespace WarrigalsAutopilot
     public class Autopilot : MonoBehaviour
     {
         bool _enabled = false;
+        bool _showGui = false;
         ApplicationLauncherButton _appLauncherButton;
         Controller _bankController;
 
@@ -39,25 +40,41 @@ namespace WarrigalsAutopilot
 
         void ShowGui()
         {
-            _enabled = true;
+            _showGui = true;
         }
 
         void HideGui()
         {
-            _enabled = false;
+            _showGui = false;
         }
 
-        //void OnGUI()
-        //{
-        //    GUILayout.Window(
-        //        id: 0,
-        //        screenRect: new Rect(100, 100, 100, 100),
-        //        func: OnWindow,
-        //        text: "Hello",
-        //        options: new[] { GUILayout.MinWidth(100) });
+        void OnGUI()
+        {
+            if (_showGui)
+            {
+                GUILayout.Window(
+                    id: 0,
+                    screenRect: new Rect(100, 100, 100, 100),
+                    func: OnWindow,
+                    text: "Warrigal's Autopilot",
+                    options: new[] { GUILayout.MinWidth(100) });
+            }
+        }
 
-        //    GUILayout.Label("Here is my label");
-        //}
+        void OnWindow(int id)
+        {
+            GUILayout.BeginVertical();
+
+            bool enableWingLevel = GUILayout.Button("Enable wing leveler");
+            if (enableWingLevel) _enabled = true;
+
+            bool disableWingLevel = GUILayout.Button("Disable wing leveler");
+            if (disableWingLevel) _enabled = false;
+
+            GUILayout.EndVertical();
+
+            GUI.DragWindow();
+        }
 
         public void FixedUpdate()
         {
