@@ -9,6 +9,7 @@ namespace WarrigalsAutopilot
         public float SetPoint { get; set; }
         public float CoeffP { get; set; }
         public bool Enabled { get; set; }
+        public bool GuiEnabled { get; set; }
         public event OutputReceiver OnOutput = delegate { };
 
         public delegate void OutputReceiver(float output);
@@ -29,6 +30,29 @@ namespace WarrigalsAutopilot
         public void Update()
         {
             if (Enabled) OnOutput(Output);
+        }
+
+        public void PaintGui(int windowId)
+        {
+            if (GuiEnabled)
+            {
+                GUILayout.Window(
+                    id: windowId,
+                    screenRect: new Rect(400, 100, 200, 100),
+                    func: OnWindow,
+                    text: Target.Name);
+            }
+        }
+
+        void OnWindow(int id)
+        {
+            GUILayout.BeginVertical();
+
+            GUILayout.Label($"P coefficient: {CoeffP}");
+            GUILayout.Label($"Set point: {SetPoint}");
+            GUILayout.Label($"Proc variable: {Target.ProcessVariable}");
+
+            GUILayout.EndVertical();
         }
     }
 }

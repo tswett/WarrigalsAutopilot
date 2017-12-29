@@ -19,8 +19,8 @@ namespace WarrigalsAutopilot
             Debug.Log("WAP: Begin Autopilot.Start");
             
             _appLauncherButton = ApplicationLauncher.Instance.AddModApplication(
-                onTrue: ShowGui,
-                onFalse: HideGui,
+                onTrue: () => _showGui = true,
+                onFalse: () => _showGui = false,
                 onHover: null,
                 onHoverOut: null,
                 onEnable: null,
@@ -55,14 +55,10 @@ namespace WarrigalsAutopilot
             ApplicationLauncher.Instance.RemoveModApplication(_appLauncherButton);
         }
 
-        void ShowGui()
+        void FixedUpdate()
         {
-            _showGui = true;
-        }
-
-        void HideGui()
-        {
-            _showGui = false;
+            _bankController.Update();
+            _pitchController.Update();
         }
 
         void OnGUI()
@@ -76,35 +72,38 @@ namespace WarrigalsAutopilot
                     text: "Warrigal's Autopilot",
                     options: new[] { GUILayout.MinWidth(100) });
             }
+
+            _bankController.PaintGui(windowId: 1);
+            _pitchController.PaintGui(windowId: 2);
         }
 
         void OnWindow(int id)
         {
             GUILayout.BeginVertical();
 
-            GUILayout.BeginHorizontal();
-            _bankController.Enabled = GUILayout.Toggle(
-                value: _bankController.Enabled,
-                text: "Wing leveler",
-                style: "button");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            _pitchController.Enabled = GUILayout.Toggle(
-                value: _pitchController.Enabled,
-                text: "Pitch control",
-                style: "button");
-            GUILayout.EndHorizontal();
+            PaintController(_bankController, "Wing leveler");
+            PaintController(_pitchController, "Pitch control");
 
             GUILayout.EndVertical();
 
             GUI.DragWindow();
         }
 
-        void FixedUpdate()
+        void PaintController(Controller controller, string text)
         {
-            _bankController.Update();
-            _pitchController.Update();
+            GUILayout.BeginHorizontal();
+
+            controller.Enabled = GUILayout.Toggle(
+                value: controller.Enabled,
+                text: text,
+                style: "button");
+
+            controller.GuiEnabled = GUILayout.Toggle(
+                value: controller.GuiEnabled,
+                text: "GUI",
+                style: "button");
+
+            GUILayout.EndHorizontal();
         }
     }
 }
