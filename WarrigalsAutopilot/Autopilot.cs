@@ -41,7 +41,8 @@ namespace WarrigalsAutopilot
             _pitchController = new Controller {
                 Target = new PitchControlTarget(ActiveVessel),
                 SetPoint = 35.0f,
-                CoeffP = 0.001f,
+                CoeffP = 0.01f,
+                CoeffI = 0.0005f,
             };
             _pitchController.OnOutput += (output) => FlightGlobals.ActiveVessel.ctrlState.pitch = output;
 

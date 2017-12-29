@@ -13,6 +13,9 @@ namespace WarrigalsAutopilot
         }
 
         public override string Name => "Bank angle";
+        public override float MinSetPoint => -180.0f;
+        public override float MaxSetPoint => 180.0f;
+
         public override float ProcessVariable
         {
             get

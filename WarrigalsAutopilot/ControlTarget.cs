@@ -7,6 +7,8 @@ namespace WarrigalsAutopilot
         public abstract string Name { get; }
 
         public abstract float ProcessVariable { get; }
+        public abstract float MinSetPoint { get; }
+        public abstract float MaxSetPoint { get; }
 
         public virtual float ErrorFromSetPoint(float setPoint)
         {

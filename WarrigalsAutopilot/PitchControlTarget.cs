@@ -13,6 +13,9 @@ namespace WarrigalsAutopilot
         }
 
         public override string Name => "Pitch angle";
+        public override float MinSetPoint => -90.0f;
+        public override float MaxSetPoint => 90.0f;
+
         public override float ProcessVariable
         {
             get
