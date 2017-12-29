@@ -7,8 +7,6 @@ namespace WarrigalsAutopilot
     [KSPAddon(startup: KSPAddon.Startup.Flight, once: false)]
     public class Autopilot : MonoBehaviour
     {
-        bool _wingLevelEnabled = false;
-        bool _pitchControlEnabled = false;
         bool _showGui = false;
         ApplicationLauncherButton _appLauncherButton;
         Controller _bankController;
@@ -18,7 +16,8 @@ namespace WarrigalsAutopilot
 
         public void Start()
         {
-            Debug.Log("WAP: calling AddModApplication...");
+            Debug.Log("WAP: Begin Autopilot.Start");
+            
             _appLauncherButton = ApplicationLauncher.Instance.AddModApplication(
                 onTrue: ShowGui,
                 onFalse: HideGui,
@@ -29,13 +28,26 @@ namespace WarrigalsAutopilot
                 visibleInScenes: ApplicationLauncher.AppScenes.FLIGHT,
                 texture: new Texture()
                 );
-            Debug.Log("WAP: done calling AddModApplication.");
 
-            ControlTarget bankTarget = new BankControlTarget(ActiveVessel);
-            _bankController = new Controller { Target = bankTarget, SetPoint = 0.0f, CoeffP = 0.001f };
+            Debug.Log("WAP: Creating _bankController");
+            _bankController = new Controller {
+                Target = new BankControlTarget(ActiveVessel),
+                SetPoint = 0.0f,
+                CoeffP = 0.001f,
+            };
+            _bankController.OnOutput += (output) => FlightGlobals.ActiveVessel.ctrlState.roll = output;
 
-            ControlTarget pitchTarget = new PitchControlTarget(ActiveVessel);
-            _pitchController = new Controller { Target = pitchTarget, SetPoint = 35.0f, CoeffP = 0.001f };
+            Debug.Log("WAP: Creating _pitchController");
+            _pitchController = new Controller {
+                Target = new PitchControlTarget(ActiveVessel),
+                SetPoint = 35.0f,
+                CoeffP = 0.001f,
+            };
+            _pitchController.OnOutput += (output) => FlightGlobals.ActiveVessel.ctrlState.pitch = output;
+
+            Debug.Log(
+                $"WAP: End Autopilot.Start, _bankController is {_bankController}, " +
+                $"_pitchController is {_pitchController}");
         }
 
         public void OnDisable()
@@ -59,7 +71,7 @@ namespace WarrigalsAutopilot
             {
                 GUILayout.Window(
                     id: 0,
-                    screenRect: new Rect(100, 100, 100, 100),
+                    screenRect: new Rect(100, 100, 200, 100),
                     func: OnWindow,
                     text: "Warrigal's Autopilot",
                     options: new[] { GUILayout.MinWidth(100) });
@@ -70,25 +82,29 @@ namespace WarrigalsAutopilot
         {
             GUILayout.BeginVertical();
 
-            _wingLevelEnabled = GUILayout.Toggle(value: _wingLevelEnabled, text: "Wing leveler");
-            _pitchControlEnabled = GUILayout.Toggle(value: _pitchControlEnabled, text: "Pitch control");
+            GUILayout.BeginHorizontal();
+            _bankController.Enabled = GUILayout.Toggle(
+                value: _bankController.Enabled,
+                text: "Wing leveler",
+                style: "button");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            _pitchController.Enabled = GUILayout.Toggle(
+                value: _pitchController.Enabled,
+                text: "Pitch control",
+                style: "button");
+            GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
 
             GUI.DragWindow();
         }
 
-        public void FixedUpdate()
+        void FixedUpdate()
         {
-            if (_wingLevelEnabled)
-            {
-                FlightGlobals.ActiveVessel.ctrlState.roll = _bankController.Output;
-            }
-
-            if (_pitchControlEnabled)
-            {
-                FlightGlobals.ActiveVessel.ctrlState.pitch = _pitchController.Output;
-            }
+            _bankController.Update();
+            _pitchController.Update();
         }
     }
 }

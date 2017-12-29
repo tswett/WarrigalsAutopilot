@@ -1,12 +1,17 @@
 ﻿using System;
+using UnityEngine;
 
 namespace WarrigalsAutopilot
 {
-    class Controller
+    public class Controller
     {
         public ControlTarget Target { get; set; }
         public float SetPoint { get; set; }
         public float CoeffP { get; set; }
+        public bool Enabled { get; set; }
+        public event OutputReceiver OnOutput = delegate { };
+
+        public delegate void OutputReceiver(float output);
 
         public float Output
         {
@@ -19,6 +24,11 @@ namespace WarrigalsAutopilot
                 //    Target.Name, Target.ProcessVariable, SetPoint, error, output));
                 return output;
             }
+        }
+
+        public void Update()
+        {
+            if (Enabled) OnOutput(Output);
         }
     }
 }

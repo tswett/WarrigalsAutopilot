@@ -2,7 +2,7 @@
 
 namespace WarrigalsAutopilot
 {
-    abstract class ControlTarget
+    public abstract class ControlTarget
     {
         public abstract string Name { get; }
 

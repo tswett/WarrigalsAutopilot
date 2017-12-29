@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WarrigalsAutopilot
 {
-    class PitchControlTarget : ControlTarget
+    public class PitchControlTarget : ControlTarget
     {
         Vessel _vessel;
 

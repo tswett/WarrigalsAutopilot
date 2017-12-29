@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WarrigalsAutopilot
 {
-    class BankControlTarget : ControlTarget
+    public class BankControlTarget : ControlTarget
     {
         Vessel _vessel;
 
