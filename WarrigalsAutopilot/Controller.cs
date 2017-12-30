@@ -12,27 +12,9 @@ namespace WarrigalsAutopilot
         public float SetPoint { get; set; }
         public float CoeffP { get; set; }
         public float CoeffI { get; set; }
-        bool _enabled;
+        public bool Enabled { get; set; }
         public bool GuiEnabled { get; set; }
         public float Output { get; private set; }
-
-        public bool Enabled
-        {
-            get { return _enabled; }
-            set
-            {
-                if (value && !_enabled)
-                {
-                    _enabled = true;
-                    ControlElement.OnEnable();
-                }
-                else if (!value && _enabled)
-                {
-                    _enabled = false;
-                    ControlElement.OnDisable();
-                }
-            }
-        }
 
         public void Update()
         {
