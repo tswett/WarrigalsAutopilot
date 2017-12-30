@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WarrigalsAutopilot
+namespace WarrigalsAutopilot.ControlTargets
 {
     public abstract class ControlTarget
     {

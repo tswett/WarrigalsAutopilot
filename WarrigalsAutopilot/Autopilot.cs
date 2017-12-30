@@ -1,6 +1,8 @@
 ﻿using KSP.UI.Screens;
 using System;
 using UnityEngine;
+using WarrigalsAutopilot.ControlElements;
+using WarrigalsAutopilot.ControlTargets;
 
 namespace WarrigalsAutopilot
 {
@@ -17,7 +19,7 @@ namespace WarrigalsAutopilot
         public void Start()
         {
             Debug.Log("WAP: Begin Autopilot.Start");
-            
+
             _appLauncherButton = ApplicationLauncher.Instance.AddModApplication(
                 onTrue: () => _showGui = true,
                 onFalse: () => _showGui = false,
@@ -30,21 +32,23 @@ namespace WarrigalsAutopilot
                 );
 
             Debug.Log("WAP: Creating _bankController");
-            _bankController = new Controller {
+            _bankController = new Controller
+            {
                 Target = new BankControlTarget(ActiveVessel),
+                ControlElement = new AileronControlElement(ActiveVessel),
                 SetPoint = 0.0f,
                 CoeffP = 0.001f,
             };
-            _bankController.OnOutput += (output) => FlightGlobals.ActiveVessel.ctrlState.roll = output;
 
             Debug.Log("WAP: Creating _pitchController");
-            _pitchController = new Controller {
+            _pitchController = new Controller
+            {
                 Target = new PitchControlTarget(ActiveVessel),
-                SetPoint = 35.0f,
+                ControlElement = new ElevatorControlElement(ActiveVessel),
+                SetPoint = 5.0f,
                 CoeffP = 0.01f,
                 CoeffI = 0.0005f,
             };
-            _pitchController.OnOutput += (output) => FlightGlobals.ActiveVessel.ctrlState.pitch = output;
 
             Debug.Log(
                 $"WAP: End Autopilot.Start, _bankController is {_bankController}, " +
@@ -68,10 +72,9 @@ namespace WarrigalsAutopilot
             {
                 GUILayout.Window(
                     id: 0,
-                    screenRect: new Rect(100, 100, 200, 100),
+                    screenRect: new Rect(100, 100, 400, 100),
                     func: OnWindow,
-                    text: "Warrigal's Autopilot",
-                    options: new[] { GUILayout.MinWidth(100) });
+                    text: "Warrigal's Autopilot");
             }
 
             _bankController.PaintGui(windowId: 1);
@@ -99,10 +102,16 @@ namespace WarrigalsAutopilot
                 text: text,
                 style: "button");
 
+            controller.SetPoint = GUILayout.HorizontalSlider(
+                value: controller.SetPoint,
+                leftValue: controller.Target.MinSetPoint,
+                rightValue: controller.Target.MaxSetPoint,
+                options: new[] { GUILayout.Width(200) });
+
             controller.GuiEnabled = GUILayout.Toggle(
                 value: controller.GuiEnabled,
                 text: "GUI",
-                style: "button");
+                style: Styles.SafeButton);
 
             GUILayout.EndHorizontal();
         }

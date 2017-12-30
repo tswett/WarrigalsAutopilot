@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace WarrigalsAutopilot
+namespace WarrigalsAutopilot.ControlTargets
 {
     public class BankControlTarget : ControlTarget
     {
