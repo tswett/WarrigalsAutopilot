@@ -26,6 +26,7 @@ namespace WarrigalsAutopilot
     {
         bool _showGui = false;
         ApplicationLauncherButton _appLauncherButton;
+        Rect _windowRectangle = new Rect(100, 100, 400, 100);
         Controller _bankController;
         Controller _pitchController;
 
@@ -87,9 +88,9 @@ namespace WarrigalsAutopilot
         {
             if (_showGui)
             {
-                GUILayout.Window(
+                _windowRectangle = GUILayout.Window(
                     id: 0,
-                    screenRect: new Rect(100, 100, 400, 100),
+                    screenRect: _windowRectangle,
                     func: OnWindow,
                     text: "Warrigal's Autopilot");
             }

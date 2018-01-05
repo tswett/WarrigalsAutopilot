@@ -31,6 +31,8 @@ namespace WarrigalsAutopilot
         public bool GuiEnabled { get; set; }
         public float Output { get; private set; }
 
+        Rect _windowRectangle = new Rect(100, 300, 500, 200);
+
         public void Update()
         {
             if (Enabled)
@@ -60,9 +62,9 @@ namespace WarrigalsAutopilot
         {
             if (GuiEnabled)
             {
-                GUILayout.Window(
+                _windowRectangle = GUILayout.Window(
                     id: windowId,
-                    screenRect: new Rect(100, 300, 500, 200),
+                    screenRect: _windowRectangle,
                     func: OnWindow,
                     text: Target.Name);
             }
@@ -102,6 +104,8 @@ namespace WarrigalsAutopilot
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
+
+            GUI.DragWindow();
         }
     }
 }
