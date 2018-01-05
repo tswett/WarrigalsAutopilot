@@ -1,4 +1,19 @@
-﻿using KSP.UI.Screens;
+﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using KSP.UI.Screens;
 using System;
 using UnityEngine;
 using WarrigalsAutopilot.ControlElements;
@@ -20,6 +35,8 @@ namespace WarrigalsAutopilot
         {
             Debug.Log("WAP: Begin Autopilot.Start");
 
+            Texture launcherButtonTexture =
+                GameDatabase.Instance.GetTexture("WarrigalsAutopilot/wap-icon", asNormalMap: false);
             _appLauncherButton = ApplicationLauncher.Instance.AddModApplication(
                 onTrue: () => _showGui = true,
                 onFalse: () => _showGui = false,
@@ -28,7 +45,7 @@ namespace WarrigalsAutopilot
                 onEnable: null,
                 onDisable: null,
                 visibleInScenes: ApplicationLauncher.AppScenes.FLIGHT,
-                texture: new Texture()
+                texture: launcherButtonTexture
                 );
 
             Debug.Log("WAP: Creating _bankController");
