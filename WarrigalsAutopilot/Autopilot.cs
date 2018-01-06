@@ -28,6 +28,7 @@ namespace WarrigalsAutopilot
         ApplicationLauncherButton _appLauncherButton;
         Rect _windowRectangle = new Rect(100, 100, 400, 100);
         Controller _bankController;
+        Controller _headingController;
         Controller _pitchController;
 
         Vessel ActiveVessel => FlightGlobals.ActiveVessel;
@@ -49,7 +50,6 @@ namespace WarrigalsAutopilot
                 texture: launcherButtonTexture
                 );
 
-            Debug.Log("WAP: Creating _bankController");
             _bankController = new Controller
             {
                 Target = new BankControlTarget(ActiveVessel),
@@ -58,7 +58,14 @@ namespace WarrigalsAutopilot
                 CoeffP = 0.001f,
             };
 
-            Debug.Log("WAP: Creating _pitchController");
+            _headingController = new Controller
+            {
+                Target = new HeadingControlTarget(ActiveVessel),
+                ControlElement = new BankControlElement(_bankController),
+                SetPoint = 90.0f,
+                CoeffP = 0.5f,
+            };
+
             _pitchController = new Controller
             {
                 Target = new PitchControlTarget(ActiveVessel),
@@ -68,9 +75,7 @@ namespace WarrigalsAutopilot
                 CoeffI = 0.0005f,
             };
 
-            Debug.Log(
-                $"WAP: End Autopilot.Start, _bankController is {_bankController}, " +
-                $"_pitchController is {_pitchController}");
+            Debug.Log("WAP: End Autopilot.Start");
         }
 
         public void OnDisable()
@@ -81,6 +86,7 @@ namespace WarrigalsAutopilot
         void FixedUpdate()
         {
             _bankController.Update();
+            _headingController.Update();
             _pitchController.Update();
         }
 
@@ -96,7 +102,8 @@ namespace WarrigalsAutopilot
             }
 
             _bankController.PaintGui(windowId: 1);
-            _pitchController.PaintGui(windowId: 2);
+            _headingController.PaintGui(windowId: 2);
+            _pitchController.PaintGui(windowId: 3);
         }
 
         void OnWindow(int id)
@@ -104,6 +111,7 @@ namespace WarrigalsAutopilot
             GUILayout.BeginVertical();
 
             PaintController(_bankController, "Wing leveler");
+            PaintController(_headingController, "Heading hold");
             PaintController(_pitchController, "Pitch control");
 
             GUILayout.EndVertical();

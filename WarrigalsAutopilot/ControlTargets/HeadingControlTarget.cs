@@ -13,21 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-
 namespace WarrigalsAutopilot.ControlTargets
 {
-    public abstract class ControlTarget
+    public class HeadingControlTarget : ControlTarget
     {
-        public abstract string Name { get; }
+        Vessel _vessel;
 
-        public abstract float ProcessVariable { get; }
-        public abstract float MinSetPoint { get; }
-        public abstract float MaxSetPoint { get; }
-
-        public virtual float ErrorFromSetPoint(float setPoint)
+        public HeadingControlTarget(Vessel vessel)
         {
-            return ProcessVariable - setPoint;
+            _vessel = vessel;
+        }
+
+        public override string Name => "Heading";
+        public override float MinSetPoint => 0.0f;
+        public override float MaxSetPoint => 360.0f;
+
+        public override float ProcessVariable { get => _vessel.GetHeading(); }
+
+        public override float ErrorFromSetPoint(float setPoint)
+        {
+            return VesselExtensions.AngleSubtract(ProcessVariable, setPoint);
         }
     }
 }

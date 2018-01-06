@@ -13,9 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using UnityEngine;
-
 namespace WarrigalsAutopilot.ControlTargets
 {
     public class BankControlTarget : ControlTarget
@@ -31,31 +28,11 @@ namespace WarrigalsAutopilot.ControlTargets
         public override float MinSetPoint => -180.0f;
         public override float MaxSetPoint => 180.0f;
 
-        public override float ProcessVariable
-        {
-            get
-            {
-                Vector3 worldUp = (Vector3)_vessel.upAxis;
-                Vector3 vesselRight = _vessel.transform.right;
-                // transform.forward is down, not forward (and transform.up is forward, not up)
-                Vector3 vesselUp = -_vessel.transform.forward;
-
-                float y = Vector3.Dot(worldUp, vesselRight);
-                float x = Vector3.Dot(worldUp, vesselUp);
-
-                float rawBank = -Mathf.Atan2(y, x) * 180 / Mathf.PI;
-
-                //Debug.Log(
-                //    $"WAP: worldUp: {worldUp}, vesselRight: {vesselRight}, vesselUp: {vesselUp}, " +
-                //    $"y: {y}, x: {x}, rawBank: {rawBank}");
-
-                return AngleSubtract(rawBank, 0.0f);
-            }
-        }
+        public override float ProcessVariable { get => _vessel.GetBankAngle(); }
 
         public override float ErrorFromSetPoint(float setPoint)
         {
-            return AngleSubtract(ProcessVariable, setPoint);
+            return VesselExtensions.AngleSubtract(ProcessVariable, setPoint);
         }
     }
 }

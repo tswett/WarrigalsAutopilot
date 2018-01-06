@@ -50,16 +50,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlElements\BankControlElement.cs" />
     <Compile Include="ControlElements\ElevatorControlElement.cs" />
     <Compile Include="ControlElements\AileronControlElement.cs" />
     <Compile Include="Autopilot.cs" />
     <Compile Include="ControlElements\ControlElement.cs" />
+    <Compile Include="ControlTargets\HeadingControlTarget.cs" />
     <Compile Include="ControlTargets\PitchControlTarget.cs" />
     <Compile Include="ControlTargets\BankControlTarget.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="ControlTargets\ControlTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Styles.cs" />
+    <Compile Include="VesselExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wap-icon.png">

@@ -31,16 +31,6 @@ namespace WarrigalsAutopilot.ControlTargets
         public override float MinSetPoint => -90.0f;
         public override float MaxSetPoint => 90.0f;
 
-        public override float ProcessVariable
-        {
-            get
-            {
-                Vector3 worldUp = (Vector3)_vessel.upAxis;
-                // transform.up is forward, not up
-                Vector3 vesselForward = _vessel.transform.up;
-
-                return 90 - Vector3.Angle(worldUp, vesselForward);
-            }
-        }
+        public override float ProcessVariable { get => _vessel.GetPitchAngle(); }
     }
 }
