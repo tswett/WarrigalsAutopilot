@@ -27,11 +27,25 @@ namespace WarrigalsAutopilot
         public float SetPoint { get; set; }
         public float CoeffP { get; set; }
         public float CoeffI { get; set; }
+        public float SliderMaxCoeffP { get; set; } = 0.5f;
+        public float SliderMaxCoeffI { get; set; } = 0.03f;
         public bool Enabled { get; set; }
         public bool GuiEnabled { get; set; }
         public float Output { get; private set; }
 
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
+
+        float CoeffPSliderPos
+        {
+            get => Mathf.Pow(CoeffP / SliderMaxCoeffP, 1.0f / 4.0f);
+            set { if (CoeffPSliderPos != value) CoeffP = SliderMaxCoeffP * Mathf.Pow(value, 4.0f); }
+        }
+
+        float CoeffISliderPos
+        {
+            get => Mathf.Pow(CoeffI / SliderMaxCoeffP, 1.0f / 4.0f);
+            set { if (CoeffISliderPos != value) CoeffI = SliderMaxCoeffP * Mathf.Pow(value, 4.0f); }
+        }
 
         public void Update()
         {
@@ -41,13 +55,13 @@ namespace WarrigalsAutopilot
                 ControlElement.Trim += CoeffI * -error * Time.fixedDeltaTime;
                 Output = CoeffP * -error + ControlElement.Trim;
 
-                if (Output < ControlElement.MinOutput)
+                if (Output < ControlElement.MinOutput && ControlElement.Trim < 0)
                 {
                     // set the trim to the lowest feasible value
                     Output = ControlElement.MinOutput;
                     ControlElement.Trim = Output + CoeffP * error;
                 }
-                else if (Output > ControlElement.MaxOutput)
+                else if (Output > ControlElement.MaxOutput && ControlElement.Trim > 0)
                 {
                     // set the trim to the highest feasible value
                     Output = ControlElement.MaxOutput;
@@ -95,12 +109,12 @@ namespace WarrigalsAutopilot
 
             GUILayout.BeginHorizontal();
             GUILayout.Label($"P coefficient: {CoeffP}", GUILayout.Width(200));
-            CoeffP = GUILayout.HorizontalSlider(CoeffP, 0.0f, 0.05f, GUILayout.Width(200));
+            CoeffPSliderPos = GUILayout.HorizontalSlider(CoeffPSliderPos, 0.0f, 1.0f, GUILayout.Width(200));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.Label($"I coefficient: {CoeffI}", GUILayout.Width(200));
-            CoeffI = GUILayout.HorizontalSlider(CoeffI, 0.0f, 0.003f, GUILayout.Width(200));
+            CoeffISliderPos = GUILayout.HorizontalSlider(CoeffISliderPos, 0.0f, 1.0f, GUILayout.Width(200));
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();

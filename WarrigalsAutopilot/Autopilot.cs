@@ -64,6 +64,8 @@ namespace WarrigalsAutopilot
                 ControlElement = new BankControlElement(_bankController),
                 SetPoint = 90.0f,
                 CoeffP = 0.5f,
+                SliderMaxCoeffP = 2.0f,
+                SliderMaxCoeffI = 0.15f,
             };
 
             _pitchController = new Controller
