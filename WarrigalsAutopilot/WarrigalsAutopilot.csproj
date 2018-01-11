@@ -60,6 +60,7 @@
     <Compile Include="ControlTargets\BankControlTarget.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="ControlTargets\ControlTarget.cs" />
+    <Compile Include="Odospinner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Styles.cs" />
     <Compile Include="VesselExtensions.cs" />

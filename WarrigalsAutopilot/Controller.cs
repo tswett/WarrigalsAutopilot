@@ -22,6 +22,7 @@ namespace WarrigalsAutopilot
 {
     public class Controller
     {
+        public string Name { get; set; }
         public ControlTarget Target { get; set; }
         public ControlElement ControlElement { get; set; }
         public float SetPoint { get; set; }
@@ -34,7 +35,6 @@ namespace WarrigalsAutopilot
         public float Output { get; private set; }
 
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
-
         float CoeffPSliderPos
         {
             get => Mathf.Pow(CoeffP / SliderMaxCoeffP, 1.0f / 4.0f);
@@ -72,7 +72,44 @@ namespace WarrigalsAutopilot
             }
         }
 
-        public void PaintGui(int windowId)
+        public void PaintSmallGui()
+        {
+            GUILayout.BeginHorizontal();
+
+            Enabled = GUILayout.Toggle(
+                value: Enabled,
+                text: Name,
+                style: "button");
+
+            GUILayout.BeginVertical();
+
+            int setPointInt = Mathf.RoundToInt(SetPoint);
+            int newSetPointInt = Odospinner.Paint(
+                setPointInt,
+                minValue: Mathf.FloorToInt(Target.MinSetPoint),
+                maxValue: Mathf.CeilToInt(Target.MaxSetPoint));
+            if (newSetPointInt != setPointInt)
+            {
+                SetPoint = newSetPointInt;
+            }
+
+            SetPoint = GUILayout.HorizontalSlider(
+                value: SetPoint,
+                leftValue: Target.MinSetPoint,
+                rightValue: Target.MaxSetPoint,
+                options: new[] { GUILayout.Width(200) });
+
+            GUILayout.EndVertical();
+
+            GuiEnabled = GUILayout.Toggle(
+                value: GuiEnabled,
+                text: "GUI",
+                style: Styles.SafeButton);
+
+            GUILayout.EndHorizontal();
+        }
+
+        public void PaintDetailGui(int windowId)
         {
             if (GuiEnabled)
             {

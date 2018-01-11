@@ -24,11 +24,22 @@ namespace WarrigalsAutopilot
     internal static class Styles
     {
         internal static GUIStyle SafeButton { get; private set; }
+        internal static GUIStyle OdoLabel { get; private set; }
+        internal static GUIStyle OdoLabelActive { get; private set; }
 
         static Styles()
         {
             SafeButton = new GUIStyle(GUI.skin.button);
             ForAllStates(SafeButton, state => state.textColor = new Color(0.0f, 1.0f, 0.0f));
+
+            OdoLabel = new GUIStyle(GUI.skin.label);
+
+            OdoLabelActive = new GUIStyle(OdoLabel);
+            OdoLabelActive.fontStyle = FontStyle.Bold;
+            ForAllStates(OdoLabelActive, state =>
+            {
+                state.textColor = new Color(1.0f, 0.0f, 1.0f);
+            });
         }
 
         static void ForAllStates(GUIStyle style, Action<GUIStyleState> action)

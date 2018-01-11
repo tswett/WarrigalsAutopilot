@@ -52,6 +52,7 @@ namespace WarrigalsAutopilot
 
             _bankController = new Controller
             {
+                Name = "Wing leveler",
                 Target = new BankControlTarget(ActiveVessel),
                 ControlElement = new AileronControlElement(ActiveVessel),
                 SetPoint = 0.0f,
@@ -60,6 +61,7 @@ namespace WarrigalsAutopilot
 
             _headingController = new Controller
             {
+                Name = "Heading hold",
                 Target = new HeadingControlTarget(ActiveVessel),
                 ControlElement = new BankControlElement(_bankController),
                 SetPoint = 90.0f,
@@ -70,6 +72,7 @@ namespace WarrigalsAutopilot
 
             _pitchController = new Controller
             {
+                Name = "Pitch control",
                 Target = new PitchControlTarget(ActiveVessel),
                 ControlElement = new ElevatorControlElement(ActiveVessel),
                 SetPoint = 5.0f,
@@ -101,47 +104,24 @@ namespace WarrigalsAutopilot
                     screenRect: _windowRectangle,
                     func: OnWindow,
                     text: "Warrigal's Autopilot");
-            }
 
-            _bankController.PaintGui(windowId: 1);
-            _headingController.PaintGui(windowId: 2);
-            _pitchController.PaintGui(windowId: 3);
+                _bankController.PaintDetailGui(windowId: 1);
+                _headingController.PaintDetailGui(windowId: 2);
+                _pitchController.PaintDetailGui(windowId: 3);
+            }
         }
 
         void OnWindow(int id)
         {
             GUILayout.BeginVertical();
 
-            PaintController(_bankController, "Wing leveler");
-            PaintController(_headingController, "Heading hold");
-            PaintController(_pitchController, "Pitch control");
+            _bankController.PaintSmallGui();
+            _headingController.PaintSmallGui();
+            _pitchController.PaintSmallGui();
 
             GUILayout.EndVertical();
 
             GUI.DragWindow();
-        }
-
-        void PaintController(Controller controller, string text)
-        {
-            GUILayout.BeginHorizontal();
-
-            controller.Enabled = GUILayout.Toggle(
-                value: controller.Enabled,
-                text: text,
-                style: "button");
-
-            controller.SetPoint = GUILayout.HorizontalSlider(
-                value: controller.SetPoint,
-                leftValue: controller.Target.MinSetPoint,
-                rightValue: controller.Target.MaxSetPoint,
-                options: new[] { GUILayout.Width(200) });
-
-            controller.GuiEnabled = GUILayout.Toggle(
-                value: controller.GuiEnabled,
-                text: "GUI",
-                style: Styles.SafeButton);
-
-            GUILayout.EndHorizontal();
         }
     }
 }
