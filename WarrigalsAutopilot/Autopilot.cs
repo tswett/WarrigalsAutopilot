@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -90,8 +90,9 @@ namespace WarrigalsAutopilot
 
         void FixedUpdate()
         {
-            _bankController.Update();
             _headingController.Update();
+            _bankController.Update();
+
             _pitchController.Update();
         }
 
@@ -121,7 +122,7 @@ namespace WarrigalsAutopilot
 
             GUILayout.EndVertical();
 
-            GUI.DragWindow();
+            GUI.DragWindow(new Rect(0, 0, 1000, 1000));
         }
     }
 }

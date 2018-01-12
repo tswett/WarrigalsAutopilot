@@ -1,4 +1,17 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using UnityEngine;
@@ -7,7 +20,7 @@ namespace WarrigalsAutopilot
 {
     static class Odospinner
     {
-        public static int Paint(int value, int minValue, int maxValue)
+        public static int Paint(int value, int minValue, int maxValue, bool wrapAround = false)
         {
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
 
@@ -25,9 +38,11 @@ namespace WarrigalsAutopilot
                 case EventType.MouseDown:
                     if (position.Contains(Event.current.mousePosition))
                     {
+                        Debug.Log("WAP: Odospinner was clicked");
                         GUIUtility.keyboardControl = controlID;
                         GUIUtility.hotControl = controlID;
 
+                        Event.current.Use();
                     }
                     break;
                 case EventType.MouseUp:
@@ -40,6 +55,7 @@ namespace WarrigalsAutopilot
                 case EventType.MouseDrag:
                     if (GUIUtility.hotControl == controlID)
                     {
+                        Debug.Log("WAP: Odospinner was dragged");
                         state.MouseDistance -= Event.current.delta.y / 10.0f;
                         value += Mathf.RoundToInt(state.MouseDistance);
                         state.MouseDistance -= Mathf.Round(state.MouseDistance);
@@ -50,16 +66,27 @@ namespace WarrigalsAutopilot
                     {
                         if (Event.current.keyCode == KeyCode.DownArrow)
                         {
-                            value = Math.Max(value - 1, minValue);
+                            value -= 1;
                         }
                         else if (Event.current.keyCode == KeyCode.UpArrow)
                         {
-                            value = Math.Min(value + 1, maxValue);
+                            value += 1;
                         }
 
                         Event.current.Use();
                     }
                     break;
+            }
+
+            if (wrapAround)
+            {
+                if (value > maxValue) value = minValue;
+                if (value < minValue) value = maxValue;
+            }
+            else
+            {
+                if (value > maxValue) value = maxValue;
+                if (value < minValue) value = minValue;
             }
 
             return value;

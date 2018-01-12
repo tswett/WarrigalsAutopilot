@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,25 +81,16 @@ namespace WarrigalsAutopilot
                 text: Name,
                 style: "button");
 
-            GUILayout.BeginVertical();
-
             int setPointInt = Mathf.RoundToInt(SetPoint);
             int newSetPointInt = Odospinner.Paint(
                 setPointInt,
-                minValue: Mathf.FloorToInt(Target.MinSetPoint),
-                maxValue: Mathf.CeilToInt(Target.MaxSetPoint));
+                minValue: Target.MinSetPointInt,
+                maxValue: Target.MaxSetPointInt,
+                wrapAround: Target.WrapAround);
             if (newSetPointInt != setPointInt)
             {
                 SetPoint = newSetPointInt;
             }
-
-            SetPoint = GUILayout.HorizontalSlider(
-                value: SetPoint,
-                leftValue: Target.MinSetPoint,
-                rightValue: Target.MaxSetPoint,
-                options: new[] { GUILayout.Width(200) });
-
-            GUILayout.EndVertical();
 
             GuiEnabled = GUILayout.Toggle(
                 value: GuiEnabled,

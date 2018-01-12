@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,12 @@ namespace WarrigalsAutopilot.ControlTargets
         }
 
         public override string Name => "Pitch angle";
+
         public override float MinSetPoint => -90.0f;
         public override float MaxSetPoint => 90.0f;
+        public override int MinSetPointInt => -90;
+        public override int MaxSetPointInt => 90;
+        public override bool WrapAround => false;
 
         public override float ProcessVariable { get => _vessel.GetPitchAngle(); }
     }

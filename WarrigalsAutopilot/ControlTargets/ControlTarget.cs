@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,9 +21,13 @@ namespace WarrigalsAutopilot.ControlTargets
     {
         public abstract string Name { get; }
 
-        public abstract float ProcessVariable { get; }
         public abstract float MinSetPoint { get; }
         public abstract float MaxSetPoint { get; }
+        public abstract int MinSetPointInt { get; }
+        public abstract int MaxSetPointInt { get; }
+        public abstract bool WrapAround { get; }
+
+        public abstract float ProcessVariable { get; }
 
         public virtual float ErrorFromSetPoint(float setPoint)
         {

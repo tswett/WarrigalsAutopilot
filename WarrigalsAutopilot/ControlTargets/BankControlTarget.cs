@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,8 +25,12 @@ namespace WarrigalsAutopilot.ControlTargets
         }
 
         public override string Name => "Bank angle";
+
         public override float MinSetPoint => -180.0f;
         public override float MaxSetPoint => 180.0f;
+        public override int MinSetPointInt => -179;
+        public override int MaxSetPointInt => 180;
+        public override bool WrapAround => true;
 
         public override float ProcessVariable { get => _vessel.GetBankAngle(); }
 
