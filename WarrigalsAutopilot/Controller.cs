@@ -78,8 +78,7 @@ namespace WarrigalsAutopilot
 
             Enabled = GUILayout.Toggle(
                 value: Enabled,
-                text: Name,
-                style: "button");
+                text: Name);
 
             int setPointInt = Mathf.RoundToInt(SetPoint);
             int newSetPointInt = Odospinner.Paint(
