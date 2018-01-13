@@ -30,6 +30,8 @@ namespace WarrigalsAutopilot
         Controller _bankController;
         Controller _headingController;
         Controller _pitchController;
+        Controller _vertSpeedController;
+        Controller _altitudeController;
 
         Vessel ActiveVessel => FlightGlobals.ActiveVessel;
 
@@ -80,6 +82,25 @@ namespace WarrigalsAutopilot
                 CoeffI = 0.0005f,
             };
 
+            _vertSpeedController = new Controller
+            {
+                Name = "Vertical speed",
+                Target = new VertSpeedControlTarget(ActiveVessel),
+                ControlElement = new PitchControlElement(_pitchController),
+                SetPoint = 0.0f,
+                CoeffP = 0.5f,
+                CoeffI = 0.02f,
+            };
+
+            _altitudeController = new Controller
+            {
+                Name = "Altitude hold",
+                Target = new AltitudeControlTarget(ActiveVessel),
+                ControlElement = new VertSpeedControlElement(_vertSpeedController),
+                SetPoint = 2000.0f,
+                CoeffP = 0.1f,
+            };
+
             Debug.Log("WAP: End Autopilot.Start");
         }
 
@@ -93,6 +114,8 @@ namespace WarrigalsAutopilot
             _headingController.Update();
             _bankController.Update();
 
+            _altitudeController.Update();
+            _vertSpeedController.Update();
             _pitchController.Update();
         }
 
@@ -109,6 +132,8 @@ namespace WarrigalsAutopilot
                 _bankController.PaintDetailGui(windowId: 1);
                 _headingController.PaintDetailGui(windowId: 2);
                 _pitchController.PaintDetailGui(windowId: 3);
+                _vertSpeedController.PaintDetailGui(windowId: 4);
+                _altitudeController.PaintDetailGui(windowId: 5);
             }
         }
 
@@ -119,6 +144,8 @@ namespace WarrigalsAutopilot
             _bankController.PaintSmallGui();
             _headingController.PaintSmallGui();
             _pitchController.PaintSmallGui();
+            _vertSpeedController.PaintSmallGui();
+            _altitudeController.PaintSmallGui();
 
             GUILayout.EndVertical();
 
