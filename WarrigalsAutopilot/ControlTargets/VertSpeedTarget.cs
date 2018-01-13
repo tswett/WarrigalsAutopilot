@@ -18,23 +18,23 @@ using UnityEngine;
 
 namespace WarrigalsAutopilot.ControlTargets
 {
-    public class PitchControlTarget : ControlTarget
+    public class VertSpeedTarget : Target
     {
         Vessel _vessel;
 
-        public PitchControlTarget(Vessel vessel)
+        public VertSpeedTarget(Vessel vessel)
         {
             _vessel = vessel;
         }
 
-        public override string Name => "Pitch angle";
+        public override string Name => "Vertical speed";
 
-        public override float MinSetPoint => -90.0f;
-        public override float MaxSetPoint => 90.0f;
-        public override int MinSetPointInt => -90;
-        public override int MaxSetPointInt => 90;
+        public override float MinSetPoint => -500.0f;
+        public override float MaxSetPoint => 500.0f;
+        public override int MinSetPointInt => -500;
+        public override int MaxSetPointInt => 500;
         public override bool WrapAround => false;
 
-        public override float ProcessVariable { get => _vessel.GetPitchAngle(); }
+        public override float ProcessVariable { get => (float)_vessel.verticalSpeed; }
     }
 }

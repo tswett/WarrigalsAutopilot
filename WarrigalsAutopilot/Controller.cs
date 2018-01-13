@@ -23,8 +23,8 @@ namespace WarrigalsAutopilot
     public class Controller
     {
         public string Name { get; set; }
-        public ControlTarget Target { get; set; }
-        public ControlElement ControlElement { get; set; }
+        public Target Target { get; set; }
+        public Element ControlElement { get; set; }
         public float SetPoint { get; set; }
         public float CoeffP { get; set; }
         public float CoeffI { get; set; }

@@ -13,28 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using UnityEngine;
-
-namespace WarrigalsAutopilot.ControlTargets
+namespace WarrigalsAutopilot.ControlElements
 {
-    public class AltitudeControlTarget : ControlTarget
+    public class BankElement : Element
     {
-        Vessel _vessel;
+        public Controller BankController { get; private set; }
 
-        public AltitudeControlTarget(Vessel vessel)
+        public BankElement(Controller bankController)
         {
-            _vessel = vessel;
+            BankController = bankController;
         }
 
-        public override string Name => "Altitude";
+        public override float MinOutput => -60.0f;
+        public override float MaxOutput => 60.0f;
 
-        public override float MinSetPoint => 0.0f;
-        public override float MaxSetPoint => 70000.0f;
-        public override int MinSetPointInt => 0;
-        public override int MaxSetPointInt => 70000;
-        public override bool WrapAround => false;
-
-        public override float ProcessVariable { get => (float)_vessel.altitude; }
+        public override void SetOutput(float output) => BankController.SetPoint = output;
     }
 }

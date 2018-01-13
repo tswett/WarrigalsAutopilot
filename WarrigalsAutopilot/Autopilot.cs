@@ -55,8 +55,8 @@ namespace WarrigalsAutopilot
             _bankController = new Controller
             {
                 Name = "Wing leveler",
-                Target = new BankControlTarget(ActiveVessel),
-                ControlElement = new AileronControlElement(ActiveVessel),
+                Target = new BankTarget(ActiveVessel),
+                ControlElement = new AileronElement(ActiveVessel),
                 SetPoint = 0.0f,
                 CoeffP = 0.001f,
             };
@@ -64,8 +64,8 @@ namespace WarrigalsAutopilot
             _headingController = new Controller
             {
                 Name = "Heading hold",
-                Target = new HeadingControlTarget(ActiveVessel),
-                ControlElement = new BankControlElement(_bankController),
+                Target = new HeadingTarget(ActiveVessel),
+                ControlElement = new BankElement(_bankController),
                 SetPoint = 90.0f,
                 CoeffP = 0.5f,
                 SliderMaxCoeffP = 2.0f,
@@ -75,8 +75,8 @@ namespace WarrigalsAutopilot
             _pitchController = new Controller
             {
                 Name = "Pitch control",
-                Target = new PitchControlTarget(ActiveVessel),
-                ControlElement = new ElevatorControlElement(ActiveVessel),
+                Target = new PitchTarget(ActiveVessel),
+                ControlElement = new ElevatorElement(ActiveVessel),
                 SetPoint = 5.0f,
                 CoeffP = 0.01f,
                 CoeffI = 0.0005f,
@@ -85,8 +85,8 @@ namespace WarrigalsAutopilot
             _vertSpeedController = new Controller
             {
                 Name = "Vertical speed",
-                Target = new VertSpeedControlTarget(ActiveVessel),
-                ControlElement = new PitchControlElement(_pitchController),
+                Target = new VertSpeedTarget(ActiveVessel),
+                ControlElement = new PitchElement(_pitchController),
                 SetPoint = 0.0f,
                 CoeffP = 0.5f,
                 CoeffI = 0.02f,
@@ -95,8 +95,8 @@ namespace WarrigalsAutopilot
             _altitudeController = new Controller
             {
                 Name = "Altitude hold",
-                Target = new AltitudeControlTarget(ActiveVessel),
-                ControlElement = new VertSpeedControlElement(_vertSpeedController),
+                Target = new AltitudeTarget(ActiveVessel),
+                ControlElement = new VertSpeedElement(_vertSpeedController),
                 SetPoint = 2000.0f,
                 CoeffP = 0.1f,
             };

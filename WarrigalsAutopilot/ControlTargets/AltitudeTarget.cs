@@ -13,30 +13,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using UnityEngine;
+
 namespace WarrigalsAutopilot.ControlTargets
 {
-    public class BankControlTarget : ControlTarget
+    public class AltitudeTarget : Target
     {
         Vessel _vessel;
 
-        public BankControlTarget(Vessel vessel)
+        public AltitudeTarget(Vessel vessel)
         {
             _vessel = vessel;
         }
 
-        public override string Name => "Bank angle";
+        public override string Name => "Altitude";
 
-        public override float MinSetPoint => -180.0f;
-        public override float MaxSetPoint => 180.0f;
-        public override int MinSetPointInt => -179;
-        public override int MaxSetPointInt => 180;
-        public override bool WrapAround => true;
+        public override float MinSetPoint => 0.0f;
+        public override float MaxSetPoint => 70000.0f;
+        public override int MinSetPointInt => 0;
+        public override int MaxSetPointInt => 70000;
+        public override bool WrapAround => false;
 
-        public override float ProcessVariable { get => _vessel.GetBankAngle(); }
-
-        public override float ErrorFromSetPoint(float setPoint)
-        {
-            return VesselExtensions.AngleSubtract(ProcessVariable, setPoint);
-        }
+        public override float ProcessVariable { get => (float)_vessel.altitude; }
     }
 }

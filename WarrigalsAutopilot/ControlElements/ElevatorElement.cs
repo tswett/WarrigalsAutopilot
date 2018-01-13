@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 
 namespace WarrigalsAutopilot.ControlElements
 {
-    public class ElevatorControlElement : ControlElement
+    public class ElevatorElement : Element
     {
         Vessel _vessel;
 
-        public ElevatorControlElement(Vessel vessel)
+        public ElevatorElement(Vessel vessel)
         {
             _vessel = vessel;
         }

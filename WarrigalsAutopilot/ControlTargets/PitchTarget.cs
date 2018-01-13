@@ -14,24 +14,27 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using UnityEngine;
 
 namespace WarrigalsAutopilot.ControlTargets
 {
-    public abstract class ControlTarget
+    public class PitchTarget : Target
     {
-        public abstract string Name { get; }
+        Vessel _vessel;
 
-        public abstract float MinSetPoint { get; }
-        public abstract float MaxSetPoint { get; }
-        public abstract int MinSetPointInt { get; }
-        public abstract int MaxSetPointInt { get; }
-        public abstract bool WrapAround { get; }
-
-        public abstract float ProcessVariable { get; }
-
-        public virtual float ErrorFromSetPoint(float setPoint)
+        public PitchTarget(Vessel vessel)
         {
-            return ProcessVariable - setPoint;
+            _vessel = vessel;
         }
+
+        public override string Name => "Pitch angle";
+
+        public override float MinSetPoint => -90.0f;
+        public override float MaxSetPoint => 90.0f;
+        public override int MinSetPointInt => -90;
+        public override int MaxSetPointInt => 90;
+        public override bool WrapAround => false;
+
+        public override float ProcessVariable { get => _vessel.GetPitchAngle(); }
     }
 }

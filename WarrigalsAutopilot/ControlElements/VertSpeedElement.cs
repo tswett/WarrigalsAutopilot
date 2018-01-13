@@ -1,4 +1,4 @@
-﻿// Copyright 2017 by Tanner "Warrigal" Swett.
+﻿// Copyright 2018 by Tanner "Warrigal" Swett.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,15 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-
 namespace WarrigalsAutopilot.ControlElements
 {
-    public abstract class ControlElement
+    public class VertSpeedElement : Element
     {
-        public virtual float Trim { get; set; }
-        public abstract float MinOutput { get; }
-        public abstract float MaxOutput { get; }
-        public abstract void SetOutput(float output);
+        public Controller VertSpeedController { get; private set; }
+
+        public VertSpeedElement(Controller vertSpeedController)
+        {
+            VertSpeedController = vertSpeedController;
+        }
+
+        public override float MinOutput => -100.0f;
+        public override float MaxOutput => 100.0f;
+
+        public override void SetOutput(float output) => VertSpeedController.SetPoint = output;
     }
 }
