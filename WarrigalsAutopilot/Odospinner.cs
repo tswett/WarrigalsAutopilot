@@ -26,12 +26,41 @@ namespace WarrigalsAutopilot
 
             Rect position = GUILayoutUtility.GetRect(width: 100, height: 30);
             bool thisHasKeyboardFocus = GUIUtility.keyboardControl == controlID;
-            State state = (State)GUIUtility.GetStateObject(typeof(State), controlID);
 
             GUI.Label(
                 position,
                 value.ToString(),
                 thisHasKeyboardFocus ? Styles.OdoLabelActive : Styles.OdoLabel);
+
+            value = HandleEvent(value, controlID, position, thisHasKeyboardFocus);
+
+            if (GUIUtility.keyboardControl == controlID)
+            {
+                InputLockManager.SetControlLock(
+                    ControlTypes.CAMERACONTROLS, $"WarrigalsAutopilot_CameraLock_{controlID}");
+            }
+            else
+            {
+                InputLockManager.RemoveControlLock($"WarrigalsAutopilot_CameraLock_{controlID}");
+            }
+
+            if (wrapAround)
+            {
+                if (value > maxValue) value = minValue;
+                if (value < minValue) value = maxValue;
+            }
+            else
+            {
+                if (value > maxValue) value = maxValue;
+                if (value < minValue) value = minValue;
+            }
+
+            return value;
+        }
+
+        static int HandleEvent(int value, int controlID, Rect position, bool thisHasKeyboardFocus)
+        {
+            State state = (State)GUIUtility.GetStateObject(typeof(State), controlID);
 
             switch (Event.current.GetTypeForControl(controlID))
             {
@@ -76,17 +105,6 @@ namespace WarrigalsAutopilot
                         Event.current.Use();
                     }
                     break;
-            }
-
-            if (wrapAround)
-            {
-                if (value > maxValue) value = minValue;
-                if (value < minValue) value = maxValue;
-            }
-            else
-            {
-                if (value > maxValue) value = maxValue;
-                if (value < minValue) value = minValue;
             }
 
             return value;

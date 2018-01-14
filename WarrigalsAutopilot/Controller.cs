@@ -25,7 +25,6 @@ namespace WarrigalsAutopilot
         public string Name { get; set; }
         public Target Target { get; set; }
         public Element ControlElement { get; set; }
-        public float SetPoint { get; set; }
         public float CoeffP { get; set; }
         public float CoeffI { get; set; }
         public float SliderMaxCoeffP { get; set; } = 0.5f;
@@ -34,7 +33,15 @@ namespace WarrigalsAutopilot
         public bool GuiEnabled { get; set; }
         public float Output { get; private set; }
 
+        float _setPoint;
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
+
+        public float SetPoint
+        {
+            get => _setPoint;
+            set => _setPoint = Math.Max(Target.MinSetPoint, Math.Min(Target.MaxSetPoint, value));
+        }
+
         float CoeffPSliderPos
         {
             get => Mathf.Pow(CoeffP / SliderMaxCoeffP, 1.0f / 4.0f);
@@ -49,23 +56,41 @@ namespace WarrigalsAutopilot
 
         public void Update()
         {
+            DebugLogger.LogVerbose("Controller name: " + Name);
+
             if (Enabled)
             {
+                DebugLogger.LogVerbose($"Old trim: {ControlElement.Trim}");
+
                 float error = Target.ErrorFromSetPoint(SetPoint);
                 ControlElement.Trim += CoeffI * -error * Time.fixedDeltaTime;
                 Output = CoeffP * -error + ControlElement.Trim;
 
+                DebugLogger.LogVerbose($"Error: {error}");
+                DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
+                DebugLogger.LogVerbose($"Output: {Output}");
+
                 if (Output < ControlElement.MinOutput && ControlElement.Trim < 0)
                 {
-                    // set the trim to the lowest feasible value
+                    DebugLogger.LogVerbose("Trim too low");
+
+                    // set the trim to the lowest feasible value, but no higher than 0
                     Output = ControlElement.MinOutput;
-                    ControlElement.Trim = Output + CoeffP * error;
+                    ControlElement.Trim = Math.Min(0.0f, Output + CoeffP * error);
+
+                    DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
+                    DebugLogger.LogVerbose($"Output: {Output}");
                 }
                 else if (Output > ControlElement.MaxOutput && ControlElement.Trim > 0)
                 {
-                    // set the trim to the highest feasible value
+                    DebugLogger.LogVerbose("Trim too high");
+
+                    // set the trim to the highest feasible value, but no lower than 0
                     Output = ControlElement.MaxOutput;
-                    ControlElement.Trim = Output + CoeffP * error;
+                    ControlElement.Trim = Math.Max(0.0f, Output + CoeffP * error);
+
+                    DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
+                    DebugLogger.LogVerbose($"Output: {Output}");
                 }
 
                 ControlElement.SetOutput(Output);
@@ -78,14 +103,17 @@ namespace WarrigalsAutopilot
 
             Enabled = GUILayout.Toggle(
                 value: Enabled,
-                text: Name);
+                text: Name,
+                options: new[] { GUILayout.Width(150.0f) });
 
             int setPointInt = Mathf.RoundToInt(SetPoint);
+
             int newSetPointInt = Odospinner.Paint(
                 setPointInt,
                 minValue: Target.MinSetPointInt,
                 maxValue: Target.MaxSetPointInt,
                 wrapAround: Target.WrapAround);
+
             if (newSetPointInt != setPointInt)
             {
                 SetPoint = newSetPointInt;

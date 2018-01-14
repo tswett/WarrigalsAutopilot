@@ -32,6 +32,7 @@ namespace WarrigalsAutopilot
         Controller _pitchController;
         Controller _vertSpeedController;
         Controller _altitudeController;
+        bool _singleStep = false;
 
         Vessel ActiveVessel => FlightGlobals.ActiveVessel;
 
@@ -79,7 +80,7 @@ namespace WarrigalsAutopilot
                 ControlElement = new ElevatorElement(ActiveVessel),
                 SetPoint = 5.0f,
                 CoeffP = 0.01f,
-                CoeffI = 0.0005f,
+                CoeffI = 0.01f,
             };
 
             _vertSpeedController = new Controller
@@ -88,8 +89,10 @@ namespace WarrigalsAutopilot
                 Target = new VertSpeedTarget(ActiveVessel),
                 ControlElement = new PitchElement(_pitchController),
                 SetPoint = 0.0f,
-                CoeffP = 0.5f,
-                CoeffI = 0.02f,
+                CoeffP = 1.0f,
+                CoeffI = 0.1f,
+                SliderMaxCoeffP = 10.0f,
+                SliderMaxCoeffI = 1.0f,
             };
 
             _altitudeController = new Controller
@@ -98,7 +101,8 @@ namespace WarrigalsAutopilot
                 Target = new AltitudeTarget(ActiveVessel),
                 ControlElement = new VertSpeedElement(_vertSpeedController),
                 SetPoint = 2000.0f,
-                CoeffP = 0.1f,
+                CoeffP = 0.5f,
+                SliderMaxCoeffP = 1.0f,
             };
 
             Debug.Log("WAP: End Autopilot.Start");
@@ -117,6 +121,8 @@ namespace WarrigalsAutopilot
             _altitudeController.Update();
             _vertSpeedController.Update();
             _pitchController.Update();
+
+            if (_singleStep) FlightDriver.SetPause(true, postScreenMessage: false);
         }
 
         void OnGUI()
@@ -146,6 +152,14 @@ namespace WarrigalsAutopilot
             _pitchController.PaintSmallGui();
             _vertSpeedController.PaintSmallGui();
             _altitudeController.PaintSmallGui();
+
+#if DEBUG
+            GUILayout.BeginHorizontal();
+            _singleStep = GUILayout.Toggle(_singleStep, "DEBUG: Single step");
+            DebugLogger.Verbose = _singleStep;
+            if (GUILayout.Button("Go")) FlightDriver.SetPause(false, postScreenMessage: false);
+            GUILayout.EndHorizontal();
+#endif
 
             GUILayout.EndVertical();
 

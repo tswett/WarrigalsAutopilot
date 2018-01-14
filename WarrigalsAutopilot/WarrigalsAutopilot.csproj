@@ -64,6 +64,7 @@
     <Compile Include="ControlTargets\BankTarget.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="ControlTargets\Target.cs" />
+    <Compile Include="DebugLogger.cs" />
     <Compile Include="Odospinner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Styles.cs" />

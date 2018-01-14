@@ -16,25 +16,20 @@
 using System;
 using UnityEngine;
 
-namespace WarrigalsAutopilot.ControlTargets
+namespace WarrigalsAutopilot
 {
-    public class VertSpeedTarget : Target
+    static class DebugLogger
     {
-        Vessel _vessel;
+        public static bool Verbose { get; set; }
 
-        public VertSpeedTarget(Vessel vessel)
+        public static void Log(string message)
         {
-            _vessel = vessel;
+            Debug.Log("WAP: " + message);
         }
 
-        public override string Name => "Vertical speed";
-
-        public override float MinSetPoint => -50.0f;
-        public override float MaxSetPoint => 50.0f;
-        public override int MinSetPointInt => -50;
-        public override int MaxSetPointInt => 50;
-        public override bool WrapAround => false;
-
-        public override float ProcessVariable { get => (float)_vessel.verticalSpeed; }
+        public static void LogVerbose(string message)
+        {
+            if (Verbose) Log(message);
+        }
     }
 }
