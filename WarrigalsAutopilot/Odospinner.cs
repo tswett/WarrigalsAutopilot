@@ -18,44 +18,54 @@ using UnityEngine;
 
 namespace WarrigalsAutopilot
 {
+    /// <summary>
+    /// A static class for an "odospinner" control, a custom spinner-like
+    /// control which, in the future, is going to support "spinning"
+    /// individual digits.
+    /// </summary>
     static class Odospinner
     {
+        /// <summary>
+        /// Paint an odospinner control. This method can only be used as part
+        /// of a Unity IMGUI user interface; it behaves the same way as methods
+        /// such as <code>GUIUtility.Button</code>.
+        /// </summary>
         public static int Paint(int value, int minValue, int maxValue, bool wrapAround = false)
         {
+            // Get the control ID and other information.
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
 
             Rect position = GUILayoutUtility.GetRect(width: 100, height: 30);
             bool thisHasKeyboardFocus = GUIUtility.keyboardControl == controlID;
 
-            GUI.Label(
-                position,
-                value.ToString(),
-                thisHasKeyboardFocus ? Styles.OdoLabelActive : Styles.OdoLabel);
+            PaintLabel(value, position, thisHasKeyboardFocus);
 
             value = HandleEvent(value, controlID, position, thisHasKeyboardFocus);
 
-            if (GUIUtility.keyboardControl == controlID)
-            {
-                InputLockManager.SetControlLock(
-                    ControlTypes.CAMERACONTROLS, $"WarrigalsAutopilot_CameraLock_{controlID}");
-            }
-            else
-            {
-                InputLockManager.RemoveControlLock($"WarrigalsAutopilot_CameraLock_{controlID}");
-            }
+            LockCameraIfFocused(controlID);
 
-            if (wrapAround)
-            {
-                if (value > maxValue) value = minValue;
-                if (value < minValue) value = maxValue;
-            }
-            else
-            {
-                if (value > maxValue) value = maxValue;
-                if (value < minValue) value = minValue;
-            }
+            value = AdjustValueToRange(value, minValue, maxValue, wrapAround);
 
             return value;
+        }
+
+        static void PaintLabel(int value, Rect position, bool thisHasKeyboardFocus)
+        {
+            string valueString = value.ToString().PadLeft(5);
+
+            int digitIndex = 0;
+            foreach (char digit in valueString)
+            {
+                Rect digitPosition = new Rect(
+                    position.x + 10.0f * digitIndex, position.y, 10.0f, position.height);
+
+                GUI.Label(
+                    digitPosition,
+                    digit.ToString(),
+                    thisHasKeyboardFocus ? Styles.OdoLabelActive : Styles.OdoLabel);
+
+                digitIndex++;
+            }
         }
 
         static int HandleEvent(int value, int controlID, Rect position, bool thisHasKeyboardFocus)
@@ -105,6 +115,44 @@ namespace WarrigalsAutopilot
                         Event.current.Use();
                     }
                     break;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// <para>Lock the camera if this control has keyboard focus.</para>
+        /// 
+        /// <para>The purpose of this is to make it so that if the player clicks this control and
+        /// then presses an arrow key in order to interact with the control, then the key press does
+        /// NOT move the camera in addition to interacting with the control.</para>
+        /// 
+        /// <para>This is a bad way to do this, but I'm not aware of any other way.</para>
+        /// </summary>
+        static void LockCameraIfFocused(int controlID)
+        {
+            if (GUIUtility.keyboardControl == controlID)
+            {
+                InputLockManager.SetControlLock(
+                    ControlTypes.CAMERACONTROLS, $"WarrigalsAutopilot_CameraLock_{controlID}");
+            }
+            else
+            {
+                InputLockManager.RemoveControlLock($"WarrigalsAutopilot_CameraLock_{controlID}");
+            }
+        }
+
+        static int AdjustValueToRange(int value, int minValue, int maxValue, bool wrapAround)
+        {
+            if (wrapAround)
+            {
+                if (value > maxValue) value = minValue;
+                if (value < minValue) value = maxValue;
+            }
+            else
+            {
+                if (value > maxValue) value = maxValue;
+                if (value < minValue) value = minValue;
             }
 
             return value;
