@@ -60,6 +60,7 @@ namespace WarrigalsAutopilot
                 ControlElement = new AileronElement(ActiveVessel),
                 SetPoint = 0.0f,
                 CoeffP = 0.001f,
+                CoeffI = 0.00002f,
             };
 
             _headingController = new Controller
@@ -68,9 +69,12 @@ namespace WarrigalsAutopilot
                 Target = new HeadingTarget(ActiveVessel),
                 ControlElement = new BankElement(_bankController),
                 SetPoint = 90.0f,
-                CoeffP = 0.5f,
+                CoeffP = 1.0f,
+                CoeffI = 0.02f,
                 SliderMaxCoeffP = 2.0f,
                 SliderMaxCoeffI = 0.15f,
+                MinOutput = -30.0f,
+                MaxOutput = 30.0f,
             };
 
             _pitchController = new Controller
@@ -93,6 +97,8 @@ namespace WarrigalsAutopilot
                 CoeffI = 0.1f,
                 SliderMaxCoeffP = 10.0f,
                 SliderMaxCoeffI = 1.0f,
+                MinOutput = -45.0f,
+                MaxOutput = 15.0f,
             };
 
             _altitudeController = new Controller
@@ -103,6 +109,8 @@ namespace WarrigalsAutopilot
                 SetPoint = 2000.0f,
                 CoeffP = 0.5f,
                 SliderMaxCoeffP = 1.0f,
+                MinOutput = -50.0f,
+                MaxOutput = 50.0f,
             };
 
             Debug.Log("WAP: End Autopilot.Start");
@@ -113,16 +121,28 @@ namespace WarrigalsAutopilot
             ApplicationLauncher.Instance.RemoveModApplication(_appLauncherButton);
         }
 
+        bool _abortFixedUpdate = false;
         void FixedUpdate()
         {
-            _headingController.Update();
-            _bankController.Update();
+            if (_abortFixedUpdate) return;
 
-            _altitudeController.Update();
-            _vertSpeedController.Update();
-            _pitchController.Update();
+            try
+            {
+                _headingController.Update();
+                _bankController.Update();
 
-            if (_singleStep) FlightDriver.SetPause(true, postScreenMessage: false);
+                _altitudeController.Update();
+                _vertSpeedController.Update();
+                _pitchController.Update();
+
+                if (_singleStep) FlightDriver.SetPause(true, postScreenMessage: false);
+            }
+            catch
+            {
+                Debug.Log("WAP: Exception occurred in FixedUpdate; stopping.");
+                _abortFixedUpdate = true;
+                throw;
+            }
         }
 
         void OnGUI()

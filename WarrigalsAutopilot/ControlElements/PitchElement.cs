@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace WarrigalsAutopilot.ControlElements
 {
     public class PitchElement : Element
@@ -21,11 +23,20 @@ namespace WarrigalsAutopilot.ControlElements
 
         public PitchElement(Controller pitchController)
         {
+            UnityEngine.Debug.Log($"pitchController.Target is {pitchController.Target}");
+            if (!(pitchController.Target is ControlTargets.PitchTarget))
+            {
+                string message = "Tried to create a PitchElement out of a Controller whose target " +
+                                 "is not a PitchTarget.";
+                throw new ArgumentOutOfRangeException(
+                    nameof(pitchController), pitchController, message);
+            }
+
             PitchController = pitchController;
         }
 
-        public override float MinOutput => -45.0f;
-        public override float MaxOutput => 15.0f;
+        public override float MinOutput => -90.0f;
+        public override float MaxOutput => 90.0f;
 
         public override void SetOutput(float output) => PitchController.SetPoint = output;
     }

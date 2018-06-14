@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace WarrigalsAutopilot.ControlElements
 {
     public class BankElement : Element
@@ -21,11 +23,20 @@ namespace WarrigalsAutopilot.ControlElements
 
         public BankElement(Controller bankController)
         {
+            UnityEngine.Debug.Log($"bankController.Target is {bankController.Target}");
+            if (!(bankController.Target is ControlTargets.BankTarget))
+            {
+                string message = "Tried to create a BankElement out of a Controller whose target " + 
+                                 "is not a BankTarget.";
+                throw new ArgumentOutOfRangeException(
+                    nameof(bankController), bankController, message);
+            }
+
             BankController = bankController;
         }
 
-        public override float MinOutput => -60.0f;
-        public override float MaxOutput => 60.0f;
+        public override float MinOutput => -180.0f;
+        public override float MaxOutput => 180.0f;
 
         public override void SetOutput(float output) => BankController.SetPoint = output;
     }

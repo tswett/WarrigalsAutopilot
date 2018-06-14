@@ -20,10 +20,24 @@ using WarrigalsAutopilot.ControlTargets;
 
 namespace WarrigalsAutopilot
 {
+    /// <summary>
+    /// A PID controller, used to indirectly control some target value by
+    /// directly manipulating some control element.
+    /// </summary>
     public class Controller
     {
+        /// <summary>
+        /// The name of this controller, such as "Heading hold".
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// The target value which this controller attempts to indirectly control.
+        /// </summary>
         public Target Target { get; set; }
+        /// <summary>
+        /// The control element which this controller directly manipulates in order to indirectly
+        /// control some target value.
+        /// </summary>
         public Element ControlElement { get; set; }
         public float CoeffP { get; set; }
         public float CoeffI { get; set; }
@@ -35,11 +49,25 @@ namespace WarrigalsAutopilot
 
         float _setPoint;
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
+        float? _minOutput;
+        float? _maxOutput;
 
         public float SetPoint
         {
             get => _setPoint;
             set => _setPoint = Math.Max(Target.MinSetPoint, Math.Min(Target.MaxSetPoint, value));
+        }
+
+        public float MinOutput
+        {
+            get => _minOutput ?? ControlElement.MinOutput;
+            set => _minOutput = value;
+        }
+
+        public float MaxOutput
+        {
+            get => _maxOutput ?? ControlElement.MaxOutput;
+            set => _maxOutput = value;
         }
 
         float CoeffPSliderPos
@@ -70,27 +98,36 @@ namespace WarrigalsAutopilot
                 DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
                 DebugLogger.LogVerbose($"Output: {Output}");
 
-                if (Output < ControlElement.MinOutput && ControlElement.Trim < 0)
+                if (Output < MinOutput)
                 {
-                    DebugLogger.LogVerbose("Trim too low");
+                    Output = MinOutput;
 
-                    // set the trim to the lowest feasible value, but no higher than 0
-                    Output = ControlElement.MinOutput;
-                    ControlElement.Trim = Math.Min(0.0f, Output + CoeffP * error);
+                    if (ControlElement.Trim < 0)
+                    {
+                        DebugLogger.LogVerbose("Trim too low");
 
-                    DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
-                    DebugLogger.LogVerbose($"Output: {Output}");
+                        // set the trim to the lowest feasible value, but no higher than 0
+                        ControlElement.Trim = Math.Min(0.0f, Output + CoeffP * error);
+
+                        DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
+                        DebugLogger.LogVerbose($"Output: {Output}");
+                    }
                 }
-                else if (Output > ControlElement.MaxOutput && ControlElement.Trim > 0)
+                else if (Output > MaxOutput)
                 {
-                    DebugLogger.LogVerbose("Trim too high");
+                    Output = MaxOutput;
 
-                    // set the trim to the highest feasible value, but no lower than 0
-                    Output = ControlElement.MaxOutput;
-                    ControlElement.Trim = Math.Max(0.0f, Output + CoeffP * error);
+                    if (ControlElement.Trim > 0)
+                    {
+                        DebugLogger.LogVerbose("Trim too high");
 
-                    DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
-                    DebugLogger.LogVerbose($"Output: {Output}");
+                        // set the trim to the highest feasible value, but no lower than 0
+                        Output = MaxOutput;
+                        ControlElement.Trim = Math.Max(0.0f, Output + CoeffP * error);
+
+                        DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
+                        DebugLogger.LogVerbose($"Output: {Output}");
+                    }
                 }
 
                 ControlElement.SetOutput(Output);

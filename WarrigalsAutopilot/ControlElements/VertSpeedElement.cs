@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace WarrigalsAutopilot.ControlElements
 {
     public class VertSpeedElement : Element
@@ -21,11 +23,20 @@ namespace WarrigalsAutopilot.ControlElements
 
         public VertSpeedElement(Controller vertSpeedController)
         {
+            UnityEngine.Debug.Log($"vertSpeedController.Target is {vertSpeedController.Target}");
+            if (!(vertSpeedController.Target is ControlTargets.VertSpeedTarget))
+            {
+                string message = "Tried to create a VertSpeedElement out of a Controller whose target " + 
+                                 "is not a VertSpeedTarget.";
+                throw new ArgumentOutOfRangeException(
+                    nameof(vertSpeedController), vertSpeedController, message);
+            }
+
             VertSpeedController = vertSpeedController;
         }
 
-        public override float MinOutput => -100.0f;
-        public override float MaxOutput => 100.0f;
+        public override float MinOutput => -500.0f;
+        public override float MaxOutput => 500.0f;
 
         public override void SetOutput(float output) => VertSpeedController.SetPoint = output;
     }
