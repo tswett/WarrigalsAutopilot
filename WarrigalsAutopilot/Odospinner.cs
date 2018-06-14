@@ -124,7 +124,8 @@ namespace WarrigalsAutopilot
                         {
                             value += increment;
                         }
-                        else if (Event.current.keyCode == KeyCode.LeftArrow)
+                        else if (Event.current.keyCode == KeyCode.LeftArrow ||
+                                 Event.current.keyCode == KeyCode.Backspace)
                         {
                             state.SelectedDigit = Math.Max(state.SelectedDigit - 1, 0);
                         }
