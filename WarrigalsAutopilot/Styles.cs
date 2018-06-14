@@ -26,6 +26,7 @@ namespace WarrigalsAutopilot
         internal static GUIStyle SafeButton { get; private set; }
         internal static GUIStyle OdoLabel { get; private set; }
         internal static GUIStyle OdoLabelActive { get; private set; }
+        internal static GUIStyle OdoLabelSelectedDigit { get; private set; }
 
         static Styles()
         {
@@ -33,12 +34,19 @@ namespace WarrigalsAutopilot
             ForAllStates(SafeButton, state => state.textColor = new Color(0.0f, 1.0f, 0.0f));
 
             OdoLabel = new GUIStyle(GUI.skin.label);
+            OdoLabel.fontSize = 20;
 
             OdoLabelActive = new GUIStyle(OdoLabel);
             OdoLabelActive.fontStyle = FontStyle.Bold;
             ForAllStates(OdoLabelActive, state =>
             {
-                state.textColor = new Color(1.0f, 0.0f, 1.0f);
+                state.textColor = new Color(1.0f, 0.0f, 1.0f); // magenta
+            });
+
+            OdoLabelSelectedDigit = new GUIStyle(OdoLabelActive);
+            ForAllStates(OdoLabelSelectedDigit, state =>
+            {
+                state.textColor = new Color(0.0f, 1.0f, 1.0f); // cyan
             });
         }
 

@@ -20,8 +20,7 @@ namespace WarrigalsAutopilot
 {
     /// <summary>
     /// A static class for an "odospinner" control, a custom spinner-like
-    /// control which, in the future, is going to support "spinning"
-    /// individual digits.
+    /// control which supports "spinning" individual digits.
     /// </summary>
     static class Odospinner
     {
@@ -35,10 +34,12 @@ namespace WarrigalsAutopilot
             // Get the control ID and other information.
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
 
+            State state = (State)GUIUtility.GetStateObject(typeof(State), controlID);
+
             Rect position = GUILayoutUtility.GetRect(width: 100, height: 30);
             bool thisHasKeyboardFocus = GUIUtility.keyboardControl == controlID;
 
-            PaintLabel(value, position, thisHasKeyboardFocus);
+            PaintLabel(value, position, thisHasKeyboardFocus, state.SelectedDigit);
 
             value = HandleEvent(value, controlID, position, thisHasKeyboardFocus);
 
@@ -49,7 +50,8 @@ namespace WarrigalsAutopilot
             return value;
         }
 
-        static void PaintLabel(int value, Rect position, bool thisHasKeyboardFocus)
+        static void PaintLabel(
+            int value, Rect position, bool thisHasKeyboardFocus, int selectedDigit)
         {
             string valueString = value.ToString().PadLeft(5);
 
@@ -57,12 +59,22 @@ namespace WarrigalsAutopilot
             foreach (char digit in valueString)
             {
                 Rect digitPosition = new Rect(
-                    position.x + 10.0f * digitIndex, position.y, 10.0f, position.height);
+                    position.x + 12.0f * digitIndex, position.y, 25.0f, position.height);
 
-                GUI.Label(
-                    digitPosition,
-                    digit.ToString(),
-                    thisHasKeyboardFocus ? Styles.OdoLabelActive : Styles.OdoLabel);
+                GUIStyle style =
+                    thisHasKeyboardFocus
+                    ? (selectedDigit == digitIndex
+                       ? Styles.OdoLabelSelectedDigit
+                       : Styles.OdoLabelActive)
+                    : Styles.OdoLabel;
+
+                char displayDigit = digit;
+                if (thisHasKeyboardFocus && selectedDigit == digitIndex && digit == ' ')
+                {
+                    displayDigit = '0';
+                }
+
+                GUI.Label(digitPosition, displayDigit.ToString(), style);
 
                 digitIndex++;
             }
@@ -71,6 +83,7 @@ namespace WarrigalsAutopilot
         static int HandleEvent(int value, int controlID, Rect position, bool thisHasKeyboardFocus)
         {
             State state = (State)GUIUtility.GetStateObject(typeof(State), controlID);
+            int increment = (new[] { 10000, 1000, 100, 10, 1 })[state.SelectedDigit];
 
             switch (Event.current.GetTypeForControl(controlID))
             {
@@ -96,7 +109,7 @@ namespace WarrigalsAutopilot
                     {
                         Debug.Log("WAP: Odospinner was dragged");
                         state.MouseDistance -= Event.current.delta.y / 10.0f;
-                        value += Mathf.RoundToInt(state.MouseDistance);
+                        value += increment * Mathf.RoundToInt(state.MouseDistance);
                         state.MouseDistance -= Mathf.Round(state.MouseDistance);
                     }
                     break;
@@ -105,11 +118,28 @@ namespace WarrigalsAutopilot
                     {
                         if (Event.current.keyCode == KeyCode.DownArrow)
                         {
-                            value -= 1;
+                            value -= increment;
                         }
                         else if (Event.current.keyCode == KeyCode.UpArrow)
                         {
-                            value += 1;
+                            value += increment;
+                        }
+                        else if (Event.current.keyCode == KeyCode.LeftArrow)
+                        {
+                            state.SelectedDigit = Math.Max(state.SelectedDigit - 1, 0);
+                        }
+                        else if (Event.current.keyCode == KeyCode.RightArrow)
+                        {
+                            state.SelectedDigit = Math.Min(state.SelectedDigit + 1, 4);
+                        }
+                        else if (NumericValueOf(Event.current.keyCode) != null)
+                        {
+                            char[] settingDigits = value.ToString().PadLeft(5).ToCharArray();
+                            int newDigitValue = NumericValueOf(Event.current.keyCode).Value;
+                            settingDigits[state.SelectedDigit] = newDigitValue.ToString()[0];
+                            value = int.Parse(new string(settingDigits));
+
+                            state.SelectedDigit = Math.Min(state.SelectedDigit + 1, 4);
                         }
 
                         Event.current.Use();
@@ -118,6 +148,22 @@ namespace WarrigalsAutopilot
             }
 
             return value;
+        }
+
+        static int? NumericValueOf(KeyCode code)
+        {
+            if (code >= KeyCode.Alpha0 && code <= KeyCode.Alpha9)
+            {
+                return (int)code - (int)KeyCode.Alpha0;
+            }
+            else if (code >= KeyCode.Keypad0 && code <= KeyCode.Keypad9)
+            {
+                return (int)code - (int)KeyCode.Keypad0;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -146,8 +192,11 @@ namespace WarrigalsAutopilot
         {
             if (wrapAround)
             {
-                if (value > maxValue) value = minValue;
-                if (value < minValue) value = maxValue;
+                int range = maxValue - minValue + 1;
+
+                value = value - minValue;
+                value = (value % range + range) % range;
+                value = value + minValue;
             }
             else
             {
@@ -161,6 +210,7 @@ namespace WarrigalsAutopilot
         class State
         {
             public float MouseDistance { get; set; }
+            public int SelectedDigit { get; set; } = 4;
         }
     }
 }
