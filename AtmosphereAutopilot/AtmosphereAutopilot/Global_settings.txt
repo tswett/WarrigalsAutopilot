@@ -1,0 +1,159 @@
+AtmosphereAutopilot
+{
+	use_neo_gui = false
+}
+Cruise_Flight
+{
+	window_x = 52
+	window_y = 213
+	window_width = 240
+}
+Gravity_turn_Fly-By-Wire
+{
+	window_x = 57
+	window_y = 453
+	window_width = 240
+}
+Velocity_director
+{
+	window_x = 475
+	window_y = 76
+}
+Acceleration_controller
+{
+	window_x = 308
+	window_y = 78
+}
+Autopilot_module_manager
+{
+	master_switch_key = P
+	window_x = 52
+	window_y = 80
+}
+settings_wnd
+{
+	window_x = 272
+	window_y = 79
+	window_width = 200
+	profiles
+	{
+		default
+		{
+			moderate_aoa = True
+			moderate_sideslip = True
+			moderate_g = True
+			moderate_g_hor = True
+			wing_leveler = True
+			max_aoa = 15
+			max_g = 15
+			max_sideslip = 15
+			max_g_hor = 15
+			ptich_v = 0.7
+			roll_v = 3
+			yaw_v = 0.5
+		}
+	}
+}
+Flight_model
+{
+	aoa_virtual_gain = 0.95
+	window_x = 1610
+	window_y = 156
+}
+Director_controller
+{
+	window_x = 275
+	window_y = 77
+}
+Pitch_ang_acc_controller
+{
+	window_x = 513
+	window_y = 89
+}
+Yaw_ang_acc_controller
+{
+	window_x = 984
+	window_y = 93
+}
+Roll_ang_acc_controller
+{
+	window_x = 723
+	window_y = 87
+}
+Pitch_ang_vel_controller
+{
+	moder_cutoff_ias = 10
+	user_input_deriv_clamp = 5
+    precision_mode_factor = 0.33
+    watch_precision_mode = True
+	AutoTrim = False
+	window_x = 315
+	window_y = 254
+}
+Roll_ang_vel_controller
+{
+	wing_leveler = True
+	user_input_deriv_clamp = 10
+    watch_precision_mode = True
+    precision_mode_factor = 0.33
+	AutoTrim = False
+	window_x = 369
+	window_y = 283
+}
+Yaw_ang_vel_controller
+{
+	moder_cutoff_ias = 10
+	user_input_deriv_clamp = 5
+    watch_precision_mode = True
+    precision_mode_factor = 0.33
+	AutoTrim = False
+	window_x = 529
+	window_y = 282
+}
+Mouse_Director
+{
+	window_x = 53
+	window_y = 219
+}
+Cruise_Flight_controller
+{
+	preudo_flc = True
+	use_keys = True
+	switch_key_mode = RightAlt
+	hotkey_course_sens = 60
+	hotkey_altitude_sens = 0.7
+	hotkey_vertspeed_sens = 30
+	hotkey_vertspeed_snap = 0.5
+	window_x = 51
+	window_y = 227
+}
+Prograde_thrust_controller
+{
+	hotkey_speed_factor = 0.7
+	use_throttle_hotkeys = True
+	window_x = 335
+	window_y = 114
+}
+Sideslip_controller
+{
+	window_x = 1096
+	window_y = 739
+}
+AoA_controller
+{
+	window_x = 1096
+	window_y = 524
+}
+Standard_Fly-By-Wire
+{
+	moderation_keycode = O
+	rocket_mode_keycode = None
+	coord_turn_keycode = None
+	window_x = 53
+	window_y = 221
+}
+hotkey_manager
+{
+	window_x = 160
+	window_y = 521
+}
