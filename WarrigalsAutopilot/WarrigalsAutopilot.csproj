@@ -75,6 +75,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AtmosphereAutopilot\AtmosphereAutopilot\AtmosphereAutopilot.csproj">
+      <Project>{d8c77eb2-8b40-4ecb-9da2-29682020c89b}</Project>
+      <Name>AtmosphereAutopilot</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AtmosphereAutopilot\AtmosphereAutopilot\AtmosphereAutopilot.GUI.csproj">
+      <Project>{3dbf4445-889c-4342-bdd6-35beed699a14}</Project>
+      <Name>AtmosphereAutopilot.GUI</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
