@@ -383,7 +383,7 @@ namespace AtmosphereAutopilot
         [AutoGuiAttr("relax_count", false)]
         protected int relax_count = 0;
 
-        protected override float get_desired_acc(float des_v)
+        protected override float get_desired_acceleration(float des_v)
         {
             float new_kacc_quadr = 0.0f;
             if (AtmosphereAutopilot.AeroModel == AtmosphereAutopilot.AerodinamycsModel.FAR)
@@ -392,13 +392,13 @@ namespace AtmosphereAutopilot
                 new_kacc_quadr = (float)(quadr_Kp * (lin_model.A[1, 2] * lin_model.C[2, 0] + lin_model.A[1, 3] * lin_model.B[3, 0] + lin_model.B[1, 0]));
             new_kacc_quadr = Math.Abs(new_kacc_quadr);
             if (float.IsNaN(new_kacc_quadr) || float.IsInfinity(new_kacc_quadr))
-                return base.get_desired_acc(des_v);
+                return base.get_desired_acceleration(des_v);
             if (first_quadr)
                 kacc_quadr = new_kacc_quadr;
             else
                 kacc_quadr = (float)Common.simple_filter(new_kacc_quadr, kacc_quadr, kacc_smoothing);
             if (kacc_quadr < 1e-5)
-                return base.get_desired_acc(des_v);
+                return base.get_desired_acceleration(des_v);
             first_quadr = false;
             double v_error = vel - des_v;
             double quadr_x;

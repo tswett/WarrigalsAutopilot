@@ -124,7 +124,7 @@ namespace AtmosphereAutopilot
 
             desired_v = process_desired_v(desired_v, user_controlled);      // moderation stage
 
-            output_acc = get_desired_acc(desired_v) + target_acc;           // produce output acceleration
+            output_acc = get_desired_acceleration(desired_v) + target_acc;           // produce output acceleration
 
             // check if we're stable on given input value
             if (ApplyTrim && vessel == AtmosphereAutopilot.Instance.ActiveVessel)
@@ -153,7 +153,14 @@ namespace AtmosphereAutopilot
 
         protected virtual float process_desired_v(float des_v, bool user_input) { return des_v; }
 
-        protected virtual float get_desired_acc(float des_v) { return Kp * (desired_v - vel); }
+        /// <summary>
+        /// Given a desired velocity, calculate the best acceleration to use in order to attain
+        /// that velocity.
+        /// </summary>
+        /// <remarks>
+        /// If not overridden, this ignores des_v and returns Kp * (desired_v - vel).
+        /// </remarks>
+        protected virtual float get_desired_acceleration(float des_v) { return Kp * (desired_v - vel); }
 
         [AutoGuiAttr("DEBUG desired_v", false, "G6")]
         protected float desired_v;

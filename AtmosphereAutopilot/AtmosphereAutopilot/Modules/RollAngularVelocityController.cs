@@ -34,23 +34,41 @@ namespace AtmosphereAutopilot
             this.acc_controller = modules[typeof(RollAngularAccController)] as RollAngularAccController;
         }
 
+        /// <summary>
+        /// "Equilibrium angular velocity on max/min input AoA flight regimes."
+        /// </summary>
         [AutoGuiAttr("max_input_v", false, "G6")]
         public float max_input_v;
 
+        /// <summary>
+        /// "Equilibrium angular velocity on max/min input AoA flight regimes."
+        /// </summary>
         [AutoGuiAttr("min_input_v", false, "G6")]
         public float min_input_v;
 
+        /// <summary>
+        /// "Used to filter out rapid changes or oscillations in flight model to provide more
+        /// smooth boundary condition evolution."
+        /// </summary>
         [AutoGuiAttr("moder_filter", true, "G6")]
         float moder_filter = 4.0f;
 
         Matrix state_mat = new Matrix(3, 1);
         Matrix input_mat = new Matrix(3, 1);
 
+        /// <summary>
+        /// True to automatically level the wings if the bank angle is less than a
+        /// particular threshold.
+        /// </summary>
         [VesselSerializable("wing_leveler")]
         [GlobalSerializable("wing_leveler")]
         [AutoGuiAttr("Wing leveler", true)]
         public bool wing_leveler = true;
 
+        /// <summary>
+        /// The bank angle below which the wings will automatically be leveled (if wing_leveler
+        /// is true).
+        /// </summary>
         [AutoGuiAttr("Snap angle", true, "G4")]
         public float leveler_snap_angle = 3.0f;
 
@@ -173,6 +191,19 @@ namespace AtmosphereAutopilot
         [AutoGuiAttr("quadr Kp", true, "G6")]
         float quadr_Kp = 0.4f;
 
+        /// <summary>
+        ///   A control coefficient for acceleration. Has units of (angle / time) / time^2.
+        /// </summary>
+        /// <remarks>
+        ///   <para>
+        ///     "Parabolic steepness of control, governed by control utility authority and craft
+        ///     characteristics. Should be positive."
+        ///   </para>
+        ///   <para>
+        ///     If the error in velocity is e, then this controller will attempt to correct the
+        ///     error in an amount of time equal to sqrt(e / kacc_quadr).
+        ///   </para>
+        /// </remarks>
         [AutoGuiAttr("kacc_quadr", false, "G6")]
         float kacc_quadr;
         bool first_quadr = true;
@@ -192,7 +223,11 @@ namespace AtmosphereAutopilot
         [AutoGuiAttr("relaxation_frame", false)]
         int relax_count = 0;
 
-        protected override float get_desired_acc(float des_v)
+        /// <summary>
+        /// Given a desired velocity, calculate the best acceleration to use in order to attain
+        /// that velocity.
+        /// </summary>
+        protected override float get_desired_acceleration(float desiredVelocity)
         {
             float new_kacc_quadr = 0.0f;
             if (AtmosphereAutopilot.AeroModel == AtmosphereAutopilot.AerodinamycsModel.FAR)
@@ -203,21 +238,22 @@ namespace AtmosphereAutopilot
                     imodel.roll_rot_model_gen.A[0, 2] * imodel.roll_rot_model_gen.B[2, 0] + imodel.roll_rot_model_gen.B[0, 0]));
             new_kacc_quadr = Math.Abs(new_kacc_quadr);
             if (float.IsNaN(new_kacc_quadr))
-                return base.get_desired_acc(des_v);
+                return base.get_desired_acceleration(desiredVelocity);
             if (first_quadr)
                 kacc_quadr = new_kacc_quadr;
             else
                 kacc_quadr = (float)Common.simple_filter(new_kacc_quadr, kacc_quadr, kacc_smoothing);
             if (kacc_quadr < 1e-3)
-                return base.get_desired_acc(des_v);
+                return base.get_desired_acceleration(desiredVelocity);
             first_quadr = false;
-            float v_error = vel - des_v;
-            double quadr_x;
+            float v_error = vel - desiredVelocity;
             float desired_deriv;
-            float dt = TimeWarp.fixedDeltaTime;
+            float deltaTime = TimeWarp.fixedDeltaTime;
 
-            quadr_x = -Math.Sqrt(Math.Abs(v_error) / kacc_quadr);
-            if (quadr_x >= -relaxation_k * dt)
+            // quadr_x is apparently the negation of an estimate of the amount of time it will take
+            // to attain the desired velocity.
+            double quadr_x = -Math.Sqrt(Math.Abs(v_error) / kacc_quadr);
+            if (quadr_x >= -relaxation_k * deltaTime)
             {
                 if (++relax_count > relaxation_frame)
                 {
@@ -225,20 +261,29 @@ namespace AtmosphereAutopilot
                     for (int i = 0; i < relaxation_frame; i++)
                         avg_vel += imodel.AngularVelHistory(axis).getFromTail(i);
                     avg_vel /= (float)relaxation_frame;
-                    v_error = avg_vel - des_v;
+                    v_error = avg_vel - desiredVelocity;
                     if (relax_count > relaxation_frame * 2)
                         relax_count--;
                 }
-                desired_deriv = (float)(relaxation_Kp * -v_error / (Math.Ceiling(relaxation_k) * dt));
+                desired_deriv = (float)(relaxation_Kp * -v_error / (Math.Ceiling(relaxation_k) * deltaTime));
             }
             else
             {
                 relax_count = 0;
-                double leftover_dt = Math.Min(dt, -quadr_x);
+                double leftover_dt = Math.Min(deltaTime, -quadr_x);
                 if (double.IsNaN(v_error))
                     desired_deriv = 0.0f;
                 else
-                    desired_deriv = (float)(Math.Sign(v_error) * (kacc_quadr * Math.Pow(quadr_x + leftover_dt, 2.0) - kacc_quadr * quadr_x * quadr_x)) / dt;
+                {
+                    // The motivation behind this formula seems to be:
+                    // "By what (negative) quantity would abs(v_error) have to be
+                    // increased in order to increase quadr_x by leftover_dt?"
+                    double absoluteVelocityAfterTick = 
+                          kacc_quadr * Math.Pow(quadr_x + leftover_dt, 2.0)
+                        - kacc_quadr * Math.Pow(quadr_x, 2.0);
+                    double velocityAfterTick = Math.Sign(v_error) * absoluteVelocityAfterTick;
+                    desired_deriv = (float)velocityAfterTick / deltaTime;
+                }
             }
 
             return desired_deriv;
