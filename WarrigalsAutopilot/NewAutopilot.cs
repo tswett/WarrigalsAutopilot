@@ -28,20 +28,51 @@ namespace WarrigalsAutopilot
             : base(v, "Warrigal's Autopilot", 478927147)
         { }
 
-        //FlightModel flightModel;
-        //DirectorController directorController;
+        CruiseController cruiseController;
 
         public override void InitializeDependencies(Dictionary<Type, AutopilotModule> modules)
         {
-            //flightModel = modules[typeof(FlightModel)] as FlightModel;
-            //directorController = modules[typeof(DirectorController)] as DirectorController;
+            cruiseController = modules[typeof(CruiseController)] as CruiseController;
         }
 
         protected override void _drawGUI(int id)
         {
             close_button();
 
-            GUILayout.Label("Placeholder for new WAP GUI");
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            bool pitchIsActive = cruiseController.Active && cruiseController.vertical_control;
+            // Ignore the result from GUILayout.Toggle; these buttons don't do anything yet.
+            GUILayout.Toggle(pitchIsActive, "PITCH", GUIStyles.toggleButtonStyle);
+            GUILayout.Label("ALTITUDE", GUILayout.Width(200));
+            int oldAltitude = Mathf.RoundToInt(cruiseController.desired_altitude.Value);
+            int newAltitude =
+                Odospinner.Paint(oldAltitude, minValue: 0, maxValue: 70000, wrapAround: false);
+            if (newAltitude != oldAltitude)
+            {
+                cruiseController.vertical_control = true;
+                cruiseController.height_mode = CruiseController.HeightMode.Altitude;
+                cruiseController.desired_altitude.Value = newAltitude;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Toggle(cruiseController.Active, "ROLL", GUIStyles.toggleButtonStyle);
+            GUILayout.Label("TRACK", GUILayout.Width(200));
+            int oldHeading = Mathf.RoundToInt(cruiseController.desired_course.Value);
+            int newHeading =
+                Odospinner.Paint(oldHeading, minValue: 0, maxValue: 359, wrapAround: true);
+            if (newHeading != oldHeading)
+            {
+                cruiseController.current_mode = CruiseController.CruiseMode.CourseHold;
+                cruiseController.desired_course.Value = newHeading;
+            }
+            GUILayout.EndHorizontal();
+
+            // cruiseController.Active = _altitudeAndHeadingEnabled;
+
+            GUILayout.EndVertical();
 
             GUI.DragWindow();
         }

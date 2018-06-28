@@ -451,7 +451,7 @@ namespace AtmosphereAutopilot
 
             GUILayout.Space(5.0f);
 
-            CourseHoldMode = GUILayout.Toggle(CourseHoldMode, "Heading",    GUIStyles.toggleButtonStyle);
+            CourseHoldMode = GUILayout.Toggle(CourseHoldMode, "Track",    GUIStyles.toggleButtonStyle);
             GUILayout.BeginHorizontal();
             GUILayout.Label("desired course", GUIStyles.labelStyleLeft);
             desired_course.DisplayLayout(GUIStyles.textBoxStyle);
