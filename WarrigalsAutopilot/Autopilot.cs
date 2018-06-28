@@ -21,6 +21,9 @@ using WarrigalsAutopilot.ControlTargets;
 
 namespace WarrigalsAutopilot
 {
+    /// <summary>
+    /// An instance of the "old" Warrigal's Autopilot.
+    /// </summary>
     [KSPAddon(startup: KSPAddon.Startup.Flight, once: false)]
     public class Autopilot : MonoBehaviour
     {

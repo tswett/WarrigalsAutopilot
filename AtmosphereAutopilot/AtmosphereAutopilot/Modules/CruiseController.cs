@@ -552,7 +552,7 @@ namespace AtmosphereAutopilot
             {
                 if (!HighLogic.LoadedSceneIsFlight || !MapView.MapIsEnabled)
                 {
-                    // we leaved map without picking
+                    // we left map without picking
                     MessageManager.post_quick_message("Cancelled");
                     picking_waypoint = false;
                     AtmosphereAutopilot.Instance.mainMenuGUIUpdate();
