@@ -235,7 +235,7 @@ namespace AtmosphereAutopilot {
 
         public float distToWaypoint {
       get {
-        if (ccAP == null || ccAP.current_mode != CruiseController.CruiseMode.Waypoint)
+        if (ccAP == null || ccAP.current_mode != LateralNavigationController.CruiseMode.Waypoint)
           return -1f;
 
         return (float)ccAP.dist_to_dest;
@@ -244,13 +244,13 @@ namespace AtmosphereAutopilot {
 
     public bool pickingWaypoint {
       get {
-        return ccAP != null && ccAP.current_mode == CruiseController.CruiseMode.Waypoint && ccAP.picking_waypoint;
+        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && ccAP.picking_waypoint;
       }
     }
 
     public bool waypointIsSet {
       get {
-        return ccAP != null && ccAP.current_mode == CruiseController.CruiseMode.Waypoint && ccAP.waypoint_entered;
+        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && ccAP.waypoint_entered;
       }
     }
 

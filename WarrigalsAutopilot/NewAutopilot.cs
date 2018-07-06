@@ -65,7 +65,7 @@ namespace WarrigalsAutopilot
                 Odospinner.Paint(oldHeading, minValue: 0, maxValue: 359, wrapAround: true);
             if (newHeading != oldHeading)
             {
-                cruiseController.current_mode = CruiseController.CruiseMode.CourseHold;
+                cruiseController.current_mode = LateralNavigationController.CruiseMode.CourseHold;
                 cruiseController.desired_course.Value = newHeading;
             }
             GUILayout.EndHorizontal();

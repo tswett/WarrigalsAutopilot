@@ -17,6 +17,7 @@ along with Atmosphere Autopilot.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static AtmosphereAutopilot.LateralNavigationController;
 
 namespace AtmosphereAutopilot
 {
@@ -43,12 +44,14 @@ namespace AtmosphereAutopilot
         FlightModel imodel;
         DirectorController dir_c;
         ProgradeThrustController thrust_c;
+        LateralNavigationController latNavController;
 
         public override void InitializeDependencies(Dictionary<Type, AutopilotModule> modules)
         {
             imodel = modules[typeof(FlightModel)] as FlightModel;
             dir_c = modules[typeof(DirectorController)] as DirectorController;
             thrust_c = modules[typeof(ProgradeThrustController)] as ProgradeThrustController;
+            latNavController = modules[typeof(LateralNavigationController)] as LateralNavigationController;
         }
 
         protected override void OnActivate()
@@ -56,13 +59,8 @@ namespace AtmosphereAutopilot
             dir_c.Activate();
             thrust_c.Activate();
             imodel.Activate();
+            latNavController.Activate();
             MessageManager.post_status_message("Cruise Flight enabled");
-
-            // let's set new circle axis
-            if (vessel.srfSpeed > 5.0)
-                circle_axis = Vector3d.Cross(vessel.srf_velocity, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
-            else
-                circle_axis = Vector3d.Cross(vessel.ReferenceTransform.up, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
         }
 
         protected override void OnDeactivate()
@@ -70,6 +68,7 @@ namespace AtmosphereAutopilot
             dir_c.Deactivate();
             thrust_c.Deactivate();
             imodel.Deactivate();
+            latNavController.Deactivate();
             MessageManager.post_status_message("Cruise Flight disabled");
         }
 
@@ -97,72 +96,16 @@ namespace AtmosphereAutopilot
             // centrifugal acceleration to stay on desired altitude
             level_acc = -planet2vesNorm * (imodel.surface_v - Vector3d.Project(imodel.surface_v, planet2vesNorm)).sqrMagnitude / planet2ves.magnitude;
 
-            switch (current_mode)
+            latNavController.ApplyControl(
+                cntrl, ref desired_velocity, planet2vesNorm, desired_course, desired_latitude,
+                desired_longitude, ref dist_to_dest, waypoint_entered, ref picking_waypoint);
+
+            if (vertical_control)
             {
-                default:
-                case CruiseMode.LevelFlight:
-                    // simply select velocity from axis
-                    desired_velocity = Vector3d.Cross(planet2vesNorm, circle_axis);
-                    handle_wide_turn();
-                    if (vertical_control)
-                    {
-                        if (height_mode == HeightMode.Altitude)
-                            desired_velocity = account_for_height(desired_velocity);
-                        else
-                            desired_velocity = account_for_vertical_vel(desired_velocity);
-                    }
-                    break;
-
-                case CruiseMode.CourseHold:
-                    if (Math.Abs(vessel.latitude) > 80.0)
-                    {
-                        // we're too close to poles, let's switch to level flight
-                        LevelFlightMode = true;
-                        goto case CruiseMode.LevelFlight;
-                    }
-                    // get direction vector form course
-                    Vector3d north = vessel.mainBody.RotationAxis;
-                    Vector3d north_projected = Vector3.ProjectOnPlane(north, planet2vesNorm);
-                    QuaternionD rotation = QuaternionD.AngleAxis(desired_course, planet2vesNorm);
-                    desired_velocity = rotation * north_projected;
-                    handle_wide_turn();
-                    if (vertical_control)
-                    {
-                        if (height_mode == HeightMode.Altitude)
-                            desired_velocity = account_for_height(desired_velocity);
-                        else
-                            desired_velocity = account_for_vertical_vel(desired_velocity);
-                    }
-                    break;
-
-                case CruiseMode.Waypoint:
-                    if (!waypoint_entered)
-                    {
-                        // goto simple level flight
-                        goto case CruiseMode.LevelFlight;
-                    }
-                    else
-                    {
-                        // set new axis
-                        Vector3d world_target_pos = vessel.mainBody.GetWorldSurfacePosition(desired_latitude, desired_longitude, vessel.altitude);
-                        dist_to_dest = Vector3d.Distance(world_target_pos, vessel.ReferenceTransform.position);
-                        if (dist_to_dest > 10000.0)
-                        {
-                            double radius = vessel.mainBody.Radius;
-                            dist_to_dest = Math.Acos(1 - (dist_to_dest * dist_to_dest) / (2 * radius * radius)) * radius;
-                        }
-                        if (dist_to_dest < 200.0)
-                        {
-                            // we're too close to target, let's switch to level flight
-                            LevelFlightMode = true;
-                            picking_waypoint = false;
-                            MessageManager.post_quick_message("Waypoint reached");
-                            goto case CruiseMode.LevelFlight;
-                        }
-                        // set new axis according to waypoint
-                        circle_axis = Vector3d.Cross(world_target_pos - vessel.mainBody.position, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
-                        goto case CruiseMode.LevelFlight;
-                    }
+                if (height_mode == HeightMode.Altitude)
+                    desired_velocity = account_for_height(desired_velocity);
+                else
+                    desired_velocity = account_for_vertical_vel(desired_velocity);
             }
 
             if (use_keys)
@@ -177,28 +120,11 @@ namespace AtmosphereAutopilot
             dir_c.strength = old_str;
         }
 
-        void handle_wide_turn()
+        public CruiseMode current_mode
         {
-            Vector3d hor_vel = imodel.surface_v - Vector3d.Project(imodel.surface_v, planet2vesNorm);
-            if (Vector3d.Dot(hor_vel.normalized, desired_velocity.normalized) < Math.Cos(0.5))
-            {
-                // we're turning for more than 45 degrees, let's force the turn to be horizontal
-                Vector3d right_turn = Vector3d.Cross(planet2vesNorm, imodel.surface_v);
-                double sign = Math.Sign(Vector3d.Dot(right_turn, desired_velocity));
-                if (sign == 0.0)
-                    sign = 1.0;
-                desired_velocity = right_turn.normalized * sign * Math.Tan(0.5) + hor_vel.normalized;
-            }
+            get => latNavController.current_mode;
+            set => latNavController.current_mode = value;
         }
-
-        public enum CruiseMode
-        {
-            LevelFlight,
-            CourseHold,
-            Waypoint
-        }
-
-        public CruiseMode current_mode = CruiseMode.LevelFlight;
 
         public enum HeightMode
         {
@@ -210,9 +136,6 @@ namespace AtmosphereAutopilot
 
         public Waypoint current_waypt = new Waypoint();
         internal bool waypoint_entered = false;
-
-        // axis to rotate around in level flight mode
-        public Vector3d circle_axis = Vector3d.zero;
 
         [AutoGuiAttr("Director controller GUI", true)]
         public bool DircGUI { get { return dir_c.IsShown(); } set { if (value) dir_c.ShowGUI(); else dir_c.UnShowGUI(); } }
@@ -350,19 +273,8 @@ namespace AtmosphereAutopilot
 
         internal bool LevelFlightMode
         {
-            get { return current_mode == CruiseMode.LevelFlight; }
-            set
-            {
-                if (value)
-                {
-                    if (current_mode != CruiseMode.LevelFlight)
-                    {
-                        // let's set new circle axis
-                        circle_axis = Vector3d.Cross(vessel.srf_velocity, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
-                    }
-                    current_mode = CruiseMode.LevelFlight;
-                }
-            }
+            get => latNavController.LevelFlightMode;
+            set => latNavController.LevelFlightMode = value;
         }
 
         bool CourseHoldMode
@@ -394,7 +306,8 @@ namespace AtmosphereAutopilot
                     {
                         if (this.Active)
                         {
-                            circle_axis = Vector3d.Cross(vessel.srf_velocity, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
+                            latNavController.circle_axis =
+                                Vector3d.Cross(vessel.srf_velocity, vessel.GetWorldPos3D() - vessel.mainBody.position).normalized;
                             start_picking_waypoint();
                         }
                         else
