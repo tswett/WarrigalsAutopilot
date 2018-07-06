@@ -1,7 +1,7 @@
 ﻿/*
  * Atmosphere Autopilot, plugin for Kerbal Space Program.
  * 
- * Copyright (C) 2016, George Sedov.
+ * Copyright (C) 2018, George Sedov, Tanner Swett.
  * 
  * Atmosphere Autopilot is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

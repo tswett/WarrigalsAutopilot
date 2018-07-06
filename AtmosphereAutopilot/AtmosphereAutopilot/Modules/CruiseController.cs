@@ -1,6 +1,9 @@
 /*
 Atmosphere Autopilot, plugin for Kerbal Space Program.
-Copyright (C) 2015-2016, Baranin Alexander aka Boris-Barboris.
+Copyright (C) 2018 by:
+
+    Baranin Alexander aka Boris-Barboris
+    Tanner Swett
 
 Atmosphere Autopilot is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
