@@ -21,6 +21,7 @@ namespace AtmosphereAutopilot {
 
     private TopModuleManager masterAP = null;
     private StandardFlyByWire fbwAP = null;
+    private LateralNavigationController latNavController = null;
     private CruiseController ccAP = null;
     private MouseDirector dcAP = null;
     private ProgradeThrustController speedAP = null;
@@ -35,6 +36,8 @@ namespace AtmosphereAutopilot {
         masterAP = parent.autopilot_module_lists[parent.ActiveVessel][typeof (TopModuleManager)] as TopModuleManager;
       if (parent.autopilot_module_lists[parent.ActiveVessel].ContainsKey (typeof (StandardFlyByWire)))
         fbwAP = parent.autopilot_module_lists[parent.ActiveVessel][typeof (StandardFlyByWire)] as StandardFlyByWire;
+      if (parent.autopilot_module_lists[parent.ActiveVessel].ContainsKey (typeof (LateralNavigationController)))
+        latNavController = parent.autopilot_module_lists[parent.ActiveVessel][typeof (LateralNavigationController)] as LateralNavigationController;
       if (parent.autopilot_module_lists[parent.ActiveVessel].ContainsKey (typeof (CruiseController)))
         ccAP = parent.autopilot_module_lists[parent.ActiveVessel][typeof (CruiseController)] as CruiseController;
       if (parent.autopilot_module_lists[parent.ActiveVessel].ContainsKey (typeof (MouseDirector)))
@@ -238,19 +241,19 @@ namespace AtmosphereAutopilot {
         if (ccAP == null || ccAP.current_mode != LateralNavigationController.CruiseMode.Waypoint)
           return -1f;
 
-        return (float)ccAP.dist_to_dest;
+        return (float)latNavController.dist_to_dest;
       }
     }
 
     public bool pickingWaypoint {
       get {
-        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && ccAP.picking_waypoint;
+        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && latNavController.picking_waypoint;
       }
     }
 
     public bool waypointIsSet {
       get {
-        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && ccAP.waypoint_entered;
+        return ccAP != null && ccAP.current_mode == LateralNavigationController.CruiseMode.Waypoint && latNavController.waypoint_entered;
       }
     }
 
@@ -259,19 +262,19 @@ namespace AtmosphereAutopilot {
         return;
       ccAP.WaypointMode = true;
       MapView.EnterMapView ();
-      ccAP.picking_waypoint = true;
+      latNavController.picking_waypoint = true;
     }
 
     public void cancelWaypointPick () {
       if (ccAP == null)
         return;
-      ccAP.picking_waypoint = false;
+      latNavController.picking_waypoint = false;
     }
 
     public void removeWaypoint () {
       if (ccAP == null)
         return;
-      ccAP.picking_waypoint = false;
+      latNavController.picking_waypoint = false;
       ccAP.LevelFlightMode = true;
     }
 

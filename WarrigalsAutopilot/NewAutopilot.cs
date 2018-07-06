@@ -28,10 +28,12 @@ namespace WarrigalsAutopilot
             : base(v, "Warrigal's Autopilot", 478927147)
         { }
 
+        LateralNavigationController latNavController;
         CruiseController cruiseController;
 
         public override void InitializeDependencies(Dictionary<Type, AutopilotModule> modules)
         {
+            latNavController = modules[typeof(LateralNavigationController)] as LateralNavigationController;
             cruiseController = modules[typeof(CruiseController)] as CruiseController;
         }
 
@@ -58,15 +60,15 @@ namespace WarrigalsAutopilot
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Toggle(cruiseController.Active, "ROLL", GUIStyles.toggleButtonStyle);
+            GUILayout.Toggle(latNavController.Active, "ROLL", GUIStyles.toggleButtonStyle);
             GUILayout.Label("TRACK", GUILayout.Width(200));
-            int oldHeading = Mathf.RoundToInt(cruiseController.desired_course.Value);
+            int oldHeading = Mathf.RoundToInt(latNavController.desired_course.Value);
             int newHeading =
                 Odospinner.Paint(oldHeading, minValue: 0, maxValue: 359, wrapAround: true);
             if (newHeading != oldHeading)
             {
-                cruiseController.current_mode = LateralNavigationController.CruiseMode.CourseHold;
-                cruiseController.desired_course.Value = newHeading;
+                latNavController.current_mode = LateralNavigationController.CruiseMode.CourseHold;
+                latNavController.desired_course.Value = newHeading;
             }
             GUILayout.EndHorizontal();
 
