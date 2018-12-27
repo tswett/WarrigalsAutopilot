@@ -32,6 +32,7 @@ namespace WarrigalsAutopilot
         Controller _pitchController;
         Controller _vertSpeedController;
         Controller _altitudeController;
+        Controller _speedByPitchController;
         bool _singleStep = false;
 
         Vessel ActiveVessel => FlightGlobals.ActiveVessel;
@@ -59,9 +60,10 @@ namespace WarrigalsAutopilot
                 Target = new BankTarget(ActiveVessel),
                 ControlElement = new AileronElement(ActiveVessel),
                 SetPoint = 0.0f,
-                CoeffP = 0.001f,
-                CoeffI = 0.00002f,
+                CoeffP = 0.002f,
+                TimeConstI = 10.0f,
             };
+            _bankController.OnDisable += () => _headingController.Enabled = false;
 
             _headingController = new Controller
             {
@@ -70,12 +72,12 @@ namespace WarrigalsAutopilot
                 ControlElement = new BankElement(_bankController),
                 SetPoint = 90.0f,
                 CoeffP = 1.0f,
-                CoeffI = 0.02f,
+                TimeConstI = 5.0f,
                 SliderMaxCoeffP = 2.0f,
-                SliderMaxCoeffI = 0.15f,
                 MinOutput = -30.0f,
                 MaxOutput = 30.0f,
             };
+            _headingController.OnEnable += () => _bankController.Enabled = true;
 
             _pitchController = new Controller
             {
@@ -83,8 +85,13 @@ namespace WarrigalsAutopilot
                 Target = new PitchTarget(ActiveVessel),
                 ControlElement = new ElevatorElement(ActiveVessel),
                 SetPoint = 5.0f,
-                CoeffP = 0.01f,
-                CoeffI = 0.01f,
+                CoeffP = 0.02f,
+                TimeConstI = 2.0f,
+            };
+            _pitchController.OnDisable += () =>
+            {
+                _vertSpeedController.Enabled = false;
+                _speedByPitchController.Enabled = false;
             };
 
             _vertSpeedController = new Controller
@@ -94,11 +101,19 @@ namespace WarrigalsAutopilot
                 ControlElement = new PitchElement(_pitchController),
                 SetPoint = 0.0f,
                 CoeffP = 1.0f,
-                CoeffI = 0.1f,
+                TimeConstI = 10.0f,
                 SliderMaxCoeffP = 10.0f,
-                SliderMaxCoeffI = 1.0f,
                 MinOutput = -45.0f,
                 MaxOutput = 15.0f,
+            };
+            _vertSpeedController.OnEnable += () =>
+            {
+                _pitchController.Enabled = true;
+                _speedByPitchController.Enabled = false;
+            };
+            _vertSpeedController.OnDisable += () =>
+            {
+                _altitudeController.Enabled = false;
             };
 
             _altitudeController = new Controller
@@ -108,9 +123,34 @@ namespace WarrigalsAutopilot
                 ControlElement = new VertSpeedElement(_vertSpeedController),
                 SetPoint = 2000.0f,
                 CoeffP = 0.5f,
+                TimeConstI = 10.0f,
+                UseCoeffI = false,
                 SliderMaxCoeffP = 1.0f,
                 MinOutput = -50.0f,
                 MaxOutput = 50.0f,
+            };
+            _altitudeController.OnEnable += () =>
+            {
+                _vertSpeedController.Enabled = true;
+            };
+
+            _speedByPitchController = new Controller
+            {
+                Name = "Airspeed (by pitch)",
+                Target = new EasTarget(ActiveVessel),
+                ControlElement = new PitchElement(_pitchController),
+                SetPoint = 100.0f,
+                CoeffP = 0.5f,
+                TimeConstI = 5.0f,
+                SliderMaxCoeffP = 10.0f,
+                MinOutput = -75.0f,
+                MaxOutput = 75.0f,
+                ReverseSense = true,
+            };
+            _speedByPitchController.OnEnable += () =>
+            {
+                _pitchController.Enabled = true;
+                _vertSpeedController.Enabled = false;
             };
 
             Debug.Log("WAP: End Autopilot.Start");
@@ -133,6 +173,7 @@ namespace WarrigalsAutopilot
 
                 _altitudeController.Update();
                 _vertSpeedController.Update();
+                _speedByPitchController.Update();
                 _pitchController.Update();
 
                 if (_singleStep) FlightDriver.SetPause(true, postScreenMessage: false);
@@ -160,6 +201,7 @@ namespace WarrigalsAutopilot
                 _pitchController.PaintDetailGui(windowId: 3);
                 _vertSpeedController.PaintDetailGui(windowId: 4);
                 _altitudeController.PaintDetailGui(windowId: 5);
+                _speedByPitchController.PaintDetailGui(windowId: 6);
             }
         }
 
@@ -172,6 +214,7 @@ namespace WarrigalsAutopilot
             _pitchController.PaintSmallGui();
             _vertSpeedController.PaintSmallGui();
             _altitudeController.PaintSmallGui();
+            _speedByPitchController.PaintSmallGui();
 
 #if DEBUG
             GUILayout.BeginHorizontal();

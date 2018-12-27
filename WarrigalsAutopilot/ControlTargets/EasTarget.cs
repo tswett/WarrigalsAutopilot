@@ -18,16 +18,16 @@ using UnityEngine;
 
 namespace WarrigalsAutopilot.ControlTargets
 {
-    public class IasTarget : Target
+    public class EasTarget : Target
     {
         Vessel _vessel;
 
-        public IasTarget(Vessel vessel)
+        public EasTarget(Vessel vessel)
         {
             _vessel = vessel;
         }
 
-        public override string Name => "Indicated airspeed";
+        public override string Name => "Equivalent airspeed";
 
         public override float MinSetPoint => 0.0f;
         public override float MaxSetPoint => 1000.0f;
@@ -35,6 +35,17 @@ namespace WarrigalsAutopilot.ControlTargets
         public override int MaxSetPointInt => 1000;
         public override bool WrapAround => false;
 
-        public override float ProcessVariable { get => (float)_vessel.indicatedAirSpeed; }
+        public override float ProcessVariable => EquivalentAirspeed;
+
+        float EquivalentAirspeed
+        {
+            get
+            {
+                // We have dynamic pressure in kilonewtons per square meter, and we want speed in
+                // meters per second. This means we need air density in tonnes per cubic meter.
+                float standardAirDensity = 0.001225f;
+                return Mathf.Sqrt(2.0f * (float)_vessel.dynamicPressurekPa / standardAirDensity);
+            }
+        }
     }
 }

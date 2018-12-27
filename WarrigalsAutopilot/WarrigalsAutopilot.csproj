@@ -57,6 +57,7 @@
     <Compile Include="ControlElements\AileronElement.cs" />
     <Compile Include="Autopilot.cs" />
     <Compile Include="ControlElements\Element.cs" />
+    <Compile Include="ControlTargets\EasTarget.cs" />
     <Compile Include="ControlTargets\VertSpeedTarget.cs" />
     <Compile Include="ControlTargets\HeadingTarget.cs" />
     <Compile Include="ControlTargets\AltitudeTarget.cs" />

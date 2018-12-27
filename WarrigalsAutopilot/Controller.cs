@@ -40,17 +40,25 @@ namespace WarrigalsAutopilot
         /// </summary>
         public Element ControlElement { get; set; }
         public float CoeffP { get; set; }
-        public float CoeffI { get; set; }
+        public float TimeConstI { get; set; }
+        public float ConstRatio { get; set; } = 0.25f;
+        public bool UseCoeffI { get; set; } = true;
+        public float CoeffI => UseCoeffI ? CoeffP / TimeConstI : 0.0f;
+        public float CoeffD => CoeffP * TimeConstI * ConstRatio;
         public float SliderMaxCoeffP { get; set; } = 0.5f;
-        public float SliderMaxCoeffI { get; set; } = 0.03f;
-        public bool Enabled { get; set; }
+        public float SliderMaxTimeConstI { get; set; } = 120.0f;
+        public float SliderMaxConstRatio { get; set; } = 5.0f;
         public bool GuiEnabled { get; set; }
         public float Output { get; private set; }
+        public bool ReverseSense { get; set; }
 
         float _setPoint;
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
         float? _minOutput;
         float? _maxOutput;
+        bool _enabled = false;
+        float? lastTarget;
+        float dTarget;
 
         public float SetPoint
         {
@@ -76,11 +84,34 @@ namespace WarrigalsAutopilot
             set { if (CoeffPSliderPos != value) CoeffP = SliderMaxCoeffP * Mathf.Pow(value, 4.0f); }
         }
 
-        float CoeffISliderPos
+        float TimeConstISliderPos
         {
-            get => Mathf.Pow(CoeffI / SliderMaxCoeffP, 1.0f / 4.0f);
-            set { if (CoeffISliderPos != value) CoeffI = SliderMaxCoeffP * Mathf.Pow(value, 4.0f); }
+            get => Mathf.Pow(TimeConstI / SliderMaxTimeConstI, 1.0f / 4.0f);
+            set { if (TimeConstISliderPos != value) TimeConstI = SliderMaxTimeConstI * Mathf.Pow(value, 4.0f); }
         }
+
+        float ConstRatioSliderPos
+        {
+            get => Mathf.Pow(ConstRatio / SliderMaxConstRatio, 1.0f / 4.0f);
+            set { if (ConstRatioSliderPos != value) ConstRatio = SliderMaxConstRatio * Mathf.Pow(value, 4.0f); }
+        }
+
+        public bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                bool wasEnabled = _enabled;
+                _enabled = value;
+                if (value && !wasEnabled)
+                    OnEnable?.Invoke();
+                if (!value && wasEnabled)
+                    OnDisable?.Invoke();
+            }
+        }
+
+        public event Action OnEnable;
+        public event Action OnDisable;
 
         public void Update()
         {
@@ -91,8 +122,12 @@ namespace WarrigalsAutopilot
                 DebugLogger.LogVerbose($"Old trim: {ControlElement.Trim}");
 
                 float error = Target.ErrorFromSetPoint(SetPoint);
+                if (ReverseSense) error = -error;
+                UpdateDTarget(Target.ProcessVariable);
+                float dError = ReverseSense ? -dTarget : dTarget;
                 ControlElement.Trim += CoeffI * -error * Time.fixedDeltaTime;
-                Output = CoeffP * -error + ControlElement.Trim;
+                float volatileTerm = CoeffD * -dError + CoeffP * -error;
+                Output = volatileTerm + ControlElement.Trim;
 
                 DebugLogger.LogVerbose($"Error: {error}");
                 DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
@@ -107,7 +142,7 @@ namespace WarrigalsAutopilot
                         DebugLogger.LogVerbose("Trim too low");
 
                         // set the trim to the lowest feasible value, but no higher than 0
-                        ControlElement.Trim = Math.Min(0.0f, Output + CoeffP * error);
+                        ControlElement.Trim = Math.Min(0.0f, Output - volatileTerm);
 
                         DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
                         DebugLogger.LogVerbose($"Output: {Output}");
@@ -123,7 +158,7 @@ namespace WarrigalsAutopilot
 
                         // set the trim to the highest feasible value, but no lower than 0
                         Output = MaxOutput;
-                        ControlElement.Trim = Math.Max(0.0f, Output + CoeffP * error);
+                        ControlElement.Trim = Math.Max(0.0f, Output - volatileTerm);
 
                         DebugLogger.LogVerbose($"New trim: {ControlElement.Trim}");
                         DebugLogger.LogVerbose($"Output: {Output}");
@@ -132,6 +167,23 @@ namespace WarrigalsAutopilot
 
                 ControlElement.SetOutput(Output);
             }
+        }
+
+        void UpdateDTarget(float target)
+        {
+            float averagingPeriod = 0.5f;
+
+            if (lastTarget.HasValue)
+            {
+                float lastTargetValue = lastTarget.Value;
+                float instantaneousDError = (target - lastTargetValue) / Time.fixedDeltaTime;
+
+                float increment = Time.fixedDeltaTime / averagingPeriod;
+                dTarget = (1 - increment) * dTarget + increment * instantaneousDError;
+            }
+
+            lastTarget = target;
+            return;
         }
 
         public void PaintSmallGui()
@@ -205,8 +257,13 @@ namespace WarrigalsAutopilot
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"I coefficient: {CoeffI}", GUILayout.Width(200));
-            CoeffISliderPos = GUILayout.HorizontalSlider(CoeffISliderPos, 0.0f, 1.0f, GUILayout.Width(200));
+            GUILayout.Label($"I time constant: {TimeConstI}", GUILayout.Width(200));
+            TimeConstISliderPos = GUILayout.HorizontalSlider(TimeConstISliderPos, 0.0f, 1.0f, GUILayout.Width(200));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"D/I time constant ratio: {ConstRatio}", GUILayout.Width(200));
+            ConstRatioSliderPos = GUILayout.HorizontalSlider(ConstRatioSliderPos, 0.0f, 1.0f, GUILayout.Width(200));
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
