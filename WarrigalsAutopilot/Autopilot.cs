@@ -29,6 +29,7 @@ namespace WarrigalsAutopilot
         Rect _windowRectangle = new Rect(100, 100, 400, 100);
         Controller _bankController;
         Controller _headingController;
+        Controller _aoaController;
         Controller _pitchController;
         Controller _vertSpeedController;
         Controller _altitudeController;
@@ -60,8 +61,8 @@ namespace WarrigalsAutopilot
                 Target = new BankTarget(ActiveVessel),
                 ControlElement = new AileronElement(ActiveVessel),
                 SetPoint = 0.0f,
-                CoeffP = 0.002f,
-                TimeConstI = 10.0f,
+                CoeffP = 0.01f,
+                TimeConstI = 2.0f,
             };
             _bankController.OnDisable += () => _headingController.Enabled = false;
 
@@ -72,22 +73,37 @@ namespace WarrigalsAutopilot
                 ControlElement = new BankElement(_bankController),
                 SetPoint = 90.0f,
                 CoeffP = 1.0f,
-                TimeConstI = 5.0f,
+                TimeConstI = 2.0f,
                 SliderMaxCoeffP = 2.0f,
                 MinOutput = -30.0f,
                 MaxOutput = 30.0f,
             };
             _headingController.OnEnable += () => _bankController.Enabled = true;
 
+            _aoaController = new Controller
+            {
+                Name = "Angle of attack",
+                Target = new AoATarget(ActiveVessel),
+                ControlElement = new ElevatorElement(ActiveVessel),
+                SetPoint = 0.0f,
+                CoeffP = 0.01f,
+                TimeConstI = 1.0f,
+            };
+            _aoaController.OnDisable += () => _pitchController.Enabled = false;
+
             _pitchController = new Controller
             {
                 Name = "Pitch control",
                 Target = new PitchTarget(ActiveVessel),
-                ControlElement = new ElevatorElement(ActiveVessel),
+                ControlElement = new AoAElement(_aoaController),
                 SetPoint = 5.0f,
-                CoeffP = 0.02f,
-                TimeConstI = 2.0f,
+                CoeffP = 1.0f,
+                TimeConstI = 0.5f,
+                SliderMaxCoeffP = 5.0f,
+                MinOutput = -10.0f,
+                MaxOutput = 15.0f,
             };
+            _pitchController.OnEnable += () => _aoaController.Enabled = true;
             _pitchController.OnDisable += () =>
             {
                 _vertSpeedController.Enabled = false;
@@ -140,8 +156,8 @@ namespace WarrigalsAutopilot
                 Target = new EasTarget(ActiveVessel),
                 ControlElement = new PitchElement(_pitchController),
                 SetPoint = 100.0f,
-                CoeffP = 0.5f,
-                TimeConstI = 5.0f,
+                CoeffP = 1.0f,
+                TimeConstI = 20.0f,
                 SliderMaxCoeffP = 10.0f,
                 MinOutput = -75.0f,
                 MaxOutput = 75.0f,
@@ -175,6 +191,7 @@ namespace WarrigalsAutopilot
                 _vertSpeedController.Update();
                 _speedByPitchController.Update();
                 _pitchController.Update();
+                _aoaController.Update();
 
                 if (_singleStep) FlightDriver.SetPause(true, postScreenMessage: false);
             }
@@ -198,10 +215,11 @@ namespace WarrigalsAutopilot
 
                 _bankController.PaintDetailGui(windowId: 1);
                 _headingController.PaintDetailGui(windowId: 2);
-                _pitchController.PaintDetailGui(windowId: 3);
-                _vertSpeedController.PaintDetailGui(windowId: 4);
-                _altitudeController.PaintDetailGui(windowId: 5);
-                _speedByPitchController.PaintDetailGui(windowId: 6);
+                _aoaController.PaintDetailGui(windowId: 3);
+                _pitchController.PaintDetailGui(windowId: 4);
+                _vertSpeedController.PaintDetailGui(windowId: 5);
+                _altitudeController.PaintDetailGui(windowId: 6);
+                _speedByPitchController.PaintDetailGui(windowId: 7);
             }
         }
 
@@ -211,6 +229,7 @@ namespace WarrigalsAutopilot
 
             _bankController.PaintSmallGui();
             _headingController.PaintSmallGui();
+            _aoaController.PaintSmallGui();
             _pitchController.PaintSmallGui();
             _vertSpeedController.PaintSmallGui();
             _altitudeController.PaintSmallGui();

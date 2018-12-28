@@ -41,7 +41,7 @@ namespace WarrigalsAutopilot
         public Element ControlElement { get; set; }
         public float CoeffP { get; set; }
         public float TimeConstI { get; set; }
-        public float ConstRatio { get; set; } = 0.25f;
+        public float ConstRatio { get; set; } = 0.7f;
         public bool UseCoeffI { get; set; } = true;
         public float CoeffI => UseCoeffI ? CoeffP / TimeConstI : 0.0f;
         public float CoeffD => CoeffP * TimeConstI * ConstRatio;
@@ -254,6 +254,11 @@ namespace WarrigalsAutopilot
             GUILayout.BeginHorizontal();
             GUILayout.Label($"P coefficient: {CoeffP}", GUILayout.Width(200));
             CoeffPSliderPos = GUILayout.HorizontalSlider(CoeffPSliderPos, 0.0f, 1.0f, GUILayout.Width(200));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Use I coefficient?", GUILayout.Width(200));
+            UseCoeffI = GUILayout.Toggle(UseCoeffI, "");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();

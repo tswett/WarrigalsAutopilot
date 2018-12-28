@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlElements\AoAElement.cs" />
     <Compile Include="ControlElements\VertSpeedElement.cs" />
     <Compile Include="ControlElements\PitchElement.cs" />
     <Compile Include="ControlElements\BankElement.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="ControlElements\AileronElement.cs" />
     <Compile Include="Autopilot.cs" />
     <Compile Include="ControlElements\Element.cs" />
+    <Compile Include="ControlTargets\AoATarget.cs" />
     <Compile Include="ControlTargets\EasTarget.cs" />
     <Compile Include="ControlTargets\VertSpeedTarget.cs" />
     <Compile Include="ControlTargets\HeadingTarget.cs" />

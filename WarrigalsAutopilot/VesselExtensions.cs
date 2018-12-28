@@ -59,6 +59,18 @@ namespace WarrigalsAutopilot
             return AngleSubtract(rawHeading, 180.0f) + 180.0f;
         }
 
+        public static float GetAngleOfAttack(this Vessel vessel)
+        {
+            Vector3 velocity = vessel.srf_velocity;
+
+            float y = Vector3.Dot(velocity, vessel.GetVesselUp());
+            float x = Vector3.Dot(velocity, vessel.GetVesselForward());
+
+            float rawAoA = -Mathf.Atan2(y, x) * 180 / Mathf.PI;
+
+            return AngleSubtract(rawAoA, 0.0f);
+        }
+
         internal static float AngleSubtract(float angle, float minusAngle)
         {
             float result = (angle - minusAngle) % 360.0f;
