@@ -14,24 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using WarrigalsAutopilot.Controllers;
 
 namespace WarrigalsAutopilot.ControlElements
 {
     public class BankElement : Element
     {
-        public Controller BankController { get; private set; }
+        public IBankController BankController { get; private set; }
 
-        public BankElement(Controller bankController)
+        public BankElement(IBankController bankController)
         {
-            UnityEngine.Debug.Log($"bankController.Target is {bankController.Target}");
-            if (!(bankController.Target is ControlTargets.BankTarget))
-            {
-                string message = "Tried to create a BankElement out of a Controller whose target " + 
-                                 "is not a BankTarget.";
-                throw new ArgumentOutOfRangeException(
-                    nameof(bankController), bankController, message);
-            }
-
             BankController = bankController;
         }
 

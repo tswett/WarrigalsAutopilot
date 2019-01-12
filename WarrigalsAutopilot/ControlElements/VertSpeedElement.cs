@@ -14,24 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using WarrigalsAutopilot.Controllers;
 
 namespace WarrigalsAutopilot.ControlElements
 {
     public class VertSpeedElement : Element
     {
-        public Controller VertSpeedController { get; private set; }
+        public IVertSpeedController VertSpeedController { get; private set; }
 
-        public VertSpeedElement(Controller vertSpeedController)
+        public VertSpeedElement(IVertSpeedController vertSpeedController)
         {
-            UnityEngine.Debug.Log($"vertSpeedController.Target is {vertSpeedController.Target}");
-            if (!(vertSpeedController.Target is ControlTargets.VertSpeedTarget))
-            {
-                string message = "Tried to create a VertSpeedElement out of a Controller whose target " + 
-                                 "is not a VertSpeedTarget.";
-                throw new ArgumentOutOfRangeException(
-                    nameof(vertSpeedController), vertSpeedController, message);
-            }
-
             VertSpeedController = vertSpeedController;
         }
 

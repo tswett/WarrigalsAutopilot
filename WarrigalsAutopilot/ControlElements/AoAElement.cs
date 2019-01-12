@@ -14,24 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using WarrigalsAutopilot.Controllers;
 
 namespace WarrigalsAutopilot.ControlElements
 {
     public class AoAElement : Element
     {
-        public Controller AoAController { get; private set; }
+        public IAoAController AoAController { get; private set; }
 
-        public AoAElement(Controller aoaController)
+        public AoAElement(IAoAController aoaController)
         {
-            UnityEngine.Debug.Log($"aoaController.Target is {aoaController.Target}");
-            if (!(aoaController.Target is ControlTargets.AoATarget))
-            {
-                string message = "Tried to create a AoAElement out of a Controller whose target " +
-                                 "is not a AoATarget.";
-                throw new ArgumentOutOfRangeException(
-                    nameof(aoaController), aoaController, message);
-            }
-
             AoAController = aoaController;
         }
 

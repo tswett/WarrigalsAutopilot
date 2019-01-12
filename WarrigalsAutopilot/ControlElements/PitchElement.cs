@@ -14,24 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using WarrigalsAutopilot.Controllers;
 
 namespace WarrigalsAutopilot.ControlElements
 {
     public class PitchElement : Element
     {
-        public Controller PitchController { get; private set; }
+        public IPitchController PitchController { get; private set; }
 
-        public PitchElement(Controller pitchController)
+        public PitchElement(IPitchController pitchController)
         {
-            UnityEngine.Debug.Log($"pitchController.Target is {pitchController.Target}");
-            if (!(pitchController.Target is ControlTargets.PitchTarget))
-            {
-                string message = "Tried to create a PitchElement out of a Controller whose target " +
-                                 "is not a PitchTarget.";
-                throw new ArgumentOutOfRangeException(
-                    nameof(pitchController), pitchController, message);
-            }
-
             PitchController = pitchController;
         }
 

@@ -35,6 +35,6 @@ namespace WarrigalsAutopilot.ControlTargets
         public override int MaxSetPointInt => 90;
         public override bool WrapAround => false;
 
-        public override float ProcessVariable { get => _vessel.GetPitchAngle(); }
+        public override float ProcessVariable => _vessel.GetPitchAngle();
     }
 }

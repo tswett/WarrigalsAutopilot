@@ -35,6 +35,6 @@ namespace WarrigalsAutopilot.ControlTargets
         public override int MaxSetPointInt => 50;
         public override bool WrapAround => false;
 
-        public override float ProcessVariable { get => (float)_vessel.verticalSpeed; }
+        public override float ProcessVariable => (float)_vessel.verticalSpeed;
     }
 }

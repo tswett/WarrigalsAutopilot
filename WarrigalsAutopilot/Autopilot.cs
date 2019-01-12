@@ -17,6 +17,7 @@ using KSP.UI.Screens;
 using System;
 using UnityEngine;
 using WarrigalsAutopilot.ControlElements;
+using WarrigalsAutopilot.Controllers;
 using WarrigalsAutopilot.ControlTargets;
 
 namespace WarrigalsAutopilot
@@ -27,13 +28,13 @@ namespace WarrigalsAutopilot
         bool _showGui = false;
         ApplicationLauncherButton _appLauncherButton;
         Rect _windowRectangle = new Rect(100, 100, 400, 100);
-        Controller _bankController;
-        Controller _headingController;
-        Controller _aoaController;
-        Controller _pitchController;
-        Controller _vertSpeedController;
-        Controller _altitudeController;
-        Controller _speedByPitchController;
+        BankController _bankController;
+        PidController _headingController;
+        AoAController _aoaController;
+        PitchController _pitchController;
+        VertSpeedController _vertSpeedController;
+        PidController _altitudeController;
+        PidController _speedByPitchController;
         bool _singleStep = false;
 
         Vessel ActiveVessel => FlightGlobals.ActiveVessel;
@@ -55,54 +56,16 @@ namespace WarrigalsAutopilot
                 texture: launcherButtonTexture
                 );
 
-            _bankController = new Controller
-            {
-                Name = "Wing leveler",
-                Target = new BankTarget(ActiveVessel),
-                ControlElement = new AileronElement(ActiveVessel),
-                SetPoint = 0.0f,
-                CoeffP = 0.01f,
-                TimeConstI = 2.0f,
-            };
+            _bankController = new BankController(ActiveVessel);
             _bankController.OnDisable += () => _headingController.Enabled = false;
 
-            _headingController = new Controller
-            {
-                Name = "Heading hold",
-                Target = new HeadingTarget(ActiveVessel),
-                ControlElement = new BankElement(_bankController),
-                SetPoint = 90.0f,
-                CoeffP = 1.0f,
-                TimeConstI = 2.0f,
-                SliderMaxCoeffP = 2.0f,
-                MinOutput = -30.0f,
-                MaxOutput = 30.0f,
-            };
+            _headingController = new HeadingController(ActiveVessel, _bankController);
             _headingController.OnEnable += () => _bankController.Enabled = true;
 
-            _aoaController = new Controller
-            {
-                Name = "Angle of attack",
-                Target = new AoATarget(ActiveVessel),
-                ControlElement = new ElevatorElement(ActiveVessel),
-                SetPoint = 0.0f,
-                CoeffP = 0.01f,
-                TimeConstI = 1.0f,
-            };
+            _aoaController = new AoAController(ActiveVessel);
             _aoaController.OnDisable += () => _pitchController.Enabled = false;
 
-            _pitchController = new Controller
-            {
-                Name = "Pitch control",
-                Target = new PitchTarget(ActiveVessel),
-                ControlElement = new AoAElement(_aoaController),
-                SetPoint = 5.0f,
-                CoeffP = 1.0f,
-                TimeConstI = 0.5f,
-                SliderMaxCoeffP = 5.0f,
-                MinOutput = -10.0f,
-                MaxOutput = 15.0f,
-            };
+            _pitchController = new PitchController(ActiveVessel, _aoaController);
             _pitchController.OnEnable += () => _aoaController.Enabled = true;
             _pitchController.OnDisable += () =>
             {
@@ -110,18 +73,7 @@ namespace WarrigalsAutopilot
                 _speedByPitchController.Enabled = false;
             };
 
-            _vertSpeedController = new Controller
-            {
-                Name = "Vertical speed",
-                Target = new VertSpeedTarget(ActiveVessel),
-                ControlElement = new PitchElement(_pitchController),
-                SetPoint = 0.0f,
-                CoeffP = 1.0f,
-                TimeConstI = 10.0f,
-                SliderMaxCoeffP = 10.0f,
-                MinOutput = -45.0f,
-                MaxOutput = 15.0f,
-            };
+            _vertSpeedController = new VertSpeedController(ActiveVessel, _pitchController);
             _vertSpeedController.OnEnable += () =>
             {
                 _pitchController.Enabled = true;
@@ -132,37 +84,13 @@ namespace WarrigalsAutopilot
                 _altitudeController.Enabled = false;
             };
 
-            _altitudeController = new Controller
-            {
-                Name = "Altitude hold",
-                Target = new AltitudeTarget(ActiveVessel),
-                ControlElement = new VertSpeedElement(_vertSpeedController),
-                SetPoint = 2000.0f,
-                CoeffP = 0.5f,
-                TimeConstI = 10.0f,
-                UseCoeffI = false,
-                SliderMaxCoeffP = 1.0f,
-                MinOutput = -50.0f,
-                MaxOutput = 50.0f,
-            };
+            _altitudeController = new AltitudeController(ActiveVessel, _vertSpeedController);
             _altitudeController.OnEnable += () =>
             {
                 _vertSpeedController.Enabled = true;
             };
 
-            _speedByPitchController = new Controller
-            {
-                Name = "Airspeed (by pitch)",
-                Target = new EasTarget(ActiveVessel),
-                ControlElement = new PitchElement(_pitchController),
-                SetPoint = 100.0f,
-                CoeffP = 1.0f,
-                TimeConstI = 20.0f,
-                SliderMaxCoeffP = 10.0f,
-                MinOutput = -75.0f,
-                MaxOutput = 75.0f,
-                ReverseSense = true,
-            };
+            _speedByPitchController = new SpeedByPitchController(ActiveVessel, _pitchController);
             _speedByPitchController.OnEnable += () =>
             {
                 _pitchController.Enabled = true;

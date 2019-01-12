@@ -18,44 +18,51 @@ using UnityEngine;
 using WarrigalsAutopilot.ControlElements;
 using WarrigalsAutopilot.ControlTargets;
 
-namespace WarrigalsAutopilot
+namespace WarrigalsAutopilot.Controllers
 {
+    public interface IController
+    {
+        event Action OnEnable;
+        event Action OnDisable;
+        float SetPoint { get; set; }
+    }
+
     /// <summary>
     /// A PID controller, used to indirectly control some target value by
     /// directly manipulating some control element.
     /// </summary>
-    public class Controller
+    public abstract class PidController : IController
     {
         /// <summary>
         /// The name of this controller, such as "Heading hold".
         /// </summary>
-        public string Name { get; set; }
+        public abstract string Name { get; }
         /// <summary>
         /// The target value which this controller attempts to indirectly control.
         /// </summary>
-        public Target Target { get; set; }
+        public Target Target { get; protected set; }
         /// <summary>
         /// The control element which this controller directly manipulates in order to indirectly
         /// control some target value.
         /// </summary>
-        public Element ControlElement { get; set; }
-        public float CoeffP { get; set; }
-        public float TimeConstI { get; set; }
-        public float ConstRatio { get; set; } = 0.7f;
-        public bool UseCoeffI { get; set; } = true;
+        public Element ControlElement { get; protected set; }
+        public float CoeffP { get; protected set; }
+        public float TimeConstI { get; protected set; }
+        public float ConstRatio { get; protected set; } = 0.7f;
+        public bool UseCoeffI { get; protected set; } = true;
         public float CoeffI => UseCoeffI ? CoeffP / TimeConstI : 0.0f;
         public float CoeffD => CoeffP * TimeConstI * ConstRatio;
-        public float SliderMaxCoeffP { get; set; } = 0.5f;
-        public float SliderMaxTimeConstI { get; set; } = 120.0f;
-        public float SliderMaxConstRatio { get; set; } = 5.0f;
-        public bool GuiEnabled { get; set; }
+        public virtual float SliderMaxCoeffP => 0.5f;
+        public virtual float SliderMaxTimeConstI => 120.0f;
+        public virtual float SliderMaxConstRatio => 5.0f;
+        public virtual float MinOutput => ControlElement.MinOutput;
+        public virtual float MaxOutput => ControlElement.MaxOutput;
+        public bool GuiEnabled { get; protected set; }
         public float Output { get; private set; }
-        public bool ReverseSense { get; set; }
+        public virtual bool ReverseSense => false;
 
         float _setPoint;
         Rect _windowRectangle = new Rect(100, 300, 500, 200);
-        float? _minOutput;
-        float? _maxOutput;
         bool _enabled = false;
         float? lastTarget;
         float dTarget;
@@ -64,18 +71,6 @@ namespace WarrigalsAutopilot
         {
             get => _setPoint;
             set => _setPoint = Math.Max(Target.MinSetPoint, Math.Min(Target.MaxSetPoint, value));
-        }
-
-        public float MinOutput
-        {
-            get => _minOutput ?? ControlElement.MinOutput;
-            set => _minOutput = value;
-        }
-
-        public float MaxOutput
-        {
-            get => _maxOutput ?? ControlElement.MaxOutput;
-            set => _maxOutput = value;
         }
 
         float CoeffPSliderPos
