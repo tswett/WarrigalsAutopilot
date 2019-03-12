@@ -13,16 +13,14 @@ namespace WarrigalsAutopilot.Controllers
     {
         public override string Name => "Pitch control";
         public override float SliderMaxCoeffP => 5.0f;
-        public override float MinOutput => -10.0f;
-        public override float MaxOutput => 15.0f;
 
-        public PitchController(Vessel vessel, IAoAController aoaController)
+        public PitchController(Vessel vessel)
         {
             Target = new PitchTarget(vessel);
-            ControlElement = new AoAElement(aoaController);
+            ControlElement = new ElevatorElement(vessel);
             SetPoint = 5.0f;
-            CoeffP = 1.0f;
-            TimeConstI = 0.5f;
+            CoeffP = 0.02f;
+            TimeConstI = 1.0f;
         }
     }
 }
