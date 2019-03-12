@@ -11,8 +11,10 @@ namespace WarrigalsAutopilot.Controllers
     {
         public override string Name => "Airspeed (by pitch)";
         public override float SliderMaxCoeffP => 10.0f;
-        public override float MinOutput => -75.0f;
-        public override float MaxOutput => 75.0f;
+        float _minPitch = -75.0f;
+        public override float MinOutput => _minPitch;
+        float _maxPitch = 75.0f;
+        public override float MaxOutput => _maxPitch;
         public override bool ReverseSense => true;
 
         public SpeedByPitchController(Vessel vessel, IPitchController pitchController)
@@ -22,6 +24,12 @@ namespace WarrigalsAutopilot.Controllers
             SetPoint = 100.0f;
             CoeffP = 1.0f;
             TimeConstI = 20.0f;
+        }
+
+        protected override void DrawAdditionalControls()
+        {
+            DrawSlider($"Min pitch: {_minPitch}", ref _minPitch, -90.0f, 0.0f);
+            DrawSlider($"Max pitch: {_maxPitch}", ref _maxPitch, -90.0f, 0.0f);
         }
     }
 }

@@ -13,6 +13,8 @@ namespace WarrigalsAutopilot.Controllers
     {
         public override string Name => "Pitch control";
         public override float SliderMaxCoeffP => 5.0f;
+        float _maxElevator = 0.5f;
+        public override float MaxOutput => _maxElevator;
 
         public PitchController(Vessel vessel)
         {
@@ -21,6 +23,11 @@ namespace WarrigalsAutopilot.Controllers
             SetPoint = 5.0f;
             CoeffP = 0.02f;
             TimeConstI = 1.0f;
+        }
+
+        protected override void DrawAdditionalControls()
+        {
+            DrawSlider($"Max up elevator: {_maxElevator}", ref _maxElevator, 0.0f, 1.0f);
         }
     }
 }

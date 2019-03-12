@@ -11,8 +11,9 @@ namespace WarrigalsAutopilot.Controllers
     {
         public override string Name => "Altitude hold";
         public override float SliderMaxCoeffP => 1.0f;
-        public override float MinOutput => -50.0f;
-        public override float MaxOutput => 50.0f;
+        float _maxVertSpeed = 50.0f;
+        public override float MinOutput => -_maxVertSpeed;
+        public override float MaxOutput => _maxVertSpeed;
 
         public AltitudeController(Vessel vessel, IVertSpeedController vertSpeedController)
         {
@@ -22,6 +23,11 @@ namespace WarrigalsAutopilot.Controllers
             CoeffP = 0.5f;
             TimeConstI = 10.0f;
             UseCoeffI = false;
+        }
+
+        protected override void DrawAdditionalControls()
+        {
+            DrawSlider($"Max vert speed: {_maxVertSpeed}", ref _maxVertSpeed, 0.0f, 500.0f);
         }
     }
 }

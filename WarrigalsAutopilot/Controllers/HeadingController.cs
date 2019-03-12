@@ -11,8 +11,9 @@ namespace WarrigalsAutopilot.Controllers
     {
         public override string Name => "Heading hold";
         public override float SliderMaxCoeffP => 2.0f;
-        public override float MinOutput => -30.0f;
-        public override float MaxOutput => 30.0f;
+        float _maxBank = 30.0f;
+        public override float MinOutput => -_maxBank;
+        public override float MaxOutput => _maxBank;
 
         public HeadingController(Vessel vessel, IBankController bankController)
         {
@@ -21,6 +22,11 @@ namespace WarrigalsAutopilot.Controllers
             SetPoint = 90.0f;
             CoeffP = 1.0f;
             TimeConstI = 2.0f;
+        }
+
+        protected override void DrawAdditionalControls()
+        {
+            DrawSlider($"Max bank: {_maxBank}", ref _maxBank, 0.0f, 90.0f);
         }
     }
 }

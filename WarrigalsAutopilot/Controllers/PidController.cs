@@ -266,9 +266,21 @@ namespace WarrigalsAutopilot.Controllers
             ConstRatioSliderPos = GUILayout.HorizontalSlider(ConstRatioSliderPos, 0.0f, 1.0f, GUILayout.Width(200));
             GUILayout.EndHorizontal();
 
+            DrawAdditionalControls();
+
             GUILayout.EndVertical();
 
             GUI.DragWindow();
+        }
+
+        protected virtual void DrawAdditionalControls() { }
+
+        protected void DrawSlider(string label, ref float variable, float min, float max)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, GUILayout.Width(200));
+            variable = GUILayout.HorizontalSlider(variable, min, max, GUILayout.Width(200));
+            GUILayout.EndHorizontal();
         }
     }
 }
