@@ -29,7 +29,7 @@ namespace WarrigalsAutopilot.Controllers
         protected override void DrawAdditionalControls()
         {
             DrawSlider($"Min pitch: {_minPitch}", ref _minPitch, -90.0f, 0.0f);
-            DrawSlider($"Max pitch: {_maxPitch}", ref _maxPitch, -90.0f, 0.0f);
+            DrawSlider($"Max pitch: {_maxPitch}", ref _maxPitch, 0.0f, 90.0f);
         }
     }
 }
